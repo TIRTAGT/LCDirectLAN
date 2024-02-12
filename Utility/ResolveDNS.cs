@@ -12,6 +12,7 @@
 **/
 
 using System;
+using System.Net;
 using System.Text.RegularExpressions;
 using DnsClient;
 using DnsClient.Protocol;
@@ -20,7 +21,6 @@ namespace LCDirectLAN.Utility
 {
     internal class ResolveDNS
     {
-		private static readonly Regex IPv4Match = new Regex("^(((2[0-4][0-9])|(25[0-5])|(1[0-9]{1,2})|([0-9]{0,2}))\\.){3}((2[0-4][0-5])|(25[0-5])|(1[0-9]{1,2})|([0-9]{0,2}))$");
 		private static readonly Regex HostnameRuleMatch = new Regex("^(((([a-z0-9])|([a-z0-9](-|_)[a-z]))+\\.)+(([a-z0-9])|([a-z0-9](-|_)[a-z0-9]))+)$");
 
 		/// <summary>
@@ -117,7 +117,12 @@ namespace LCDirectLAN.Utility
 		/// <returns>Boolean representing whether the string is a valid IPv4</returns>
 		public static bool IsValidIPv4(string ip)
         {
-            return ResolveDNS.IPv4Match.IsMatch(ip);
+            if (IPAddress.TryParse(ip, out IPAddress a))
+			{
+				return a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
+			}
+
+			return false;
         }
 
 		public static bool IsOnHostnameFormat(string hostname)
