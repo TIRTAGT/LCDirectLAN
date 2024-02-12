@@ -149,8 +149,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			if (HideJoinData > 0) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Applying server leak protection based on HideRawJoinData's bitwise value: {HideJoinData}");
 
-					// Check if we should hide IP Address
-				if ((HideJoinData & 1) == 1 && !string.IsNullOrEmpty(PublicServerJoinData.Address) && ResolveDNS.IsValidIPv4(PublicServerJoinData.Address)) {
+				// Check if we should hide IP Address
+				if ((HideJoinData & 1) == 1 && !string.IsNullOrEmpty(PublicServerJoinData.Address) && ResolveDNS.CheckIPType(PublicServerJoinData.Address) != System.Net.Sockets.AddressFamily.Unknown) {
 					PublicServerJoinData.Address = "";
 					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "Server IP Address from config is cleared !");
 				}
@@ -373,7 +373,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			GameObject ServerNameField_GameObject = DCSettingsContainer.transform.Find("ServerNameField").gameObject;
 			ServerNameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 110, 0), ServerNameField_GameObject.transform.localRotation);
 			TMP_InputField ServerNameInputField = ServerNameField_GameObject.GetComponent<TMP_InputField>();
-			((TextMeshProUGUI)ServerNameInputField.placeholder).text = "127.0.0.1";
+			((TextMeshProUGUI)ServerNameInputField.placeholder).text = "";
 			ServerNameInputField.text = "";
 			ServerNameInputField.onValueChanged.AddListener(new UnityEngine.Events.UnityAction<string>(OnServerNameInputField_Changed));
 
@@ -621,7 +621,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 
 			// Check if the input looks like a valid hostname
-			if (!ResolveDNS.IsValidIPv4(PrivateServerJoinData.Address) && ResolveDNS.IsOnHostnameFormat(PrivateServerJoinData.Address)) {
+			if (ResolveDNS.CheckIPType(PrivateServerJoinData.Address) == System.Net.Sockets.AddressFamily.Unknown && ResolveDNS.IsOnHostnameFormat(PrivateServerJoinData.Address)) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "Detected a valid hostname, trying to resolve it...");
 
 				__MenuManager.StartCoroutine(PerformDNSAutoConfigure(PrivateServerJoinData.Address, false, ResolvedData => {
@@ -668,8 +668,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		/// Continue the direct join connect process (this is used to make ASYNC DNS resolve compatible with non-DNS connect)
 		/// </summary>
 		private static void ContinueDirectJoinConnect() {
-			// Check if this is not a valid IPv4 (also checks if the DNS resolved IP is valid too)
-			if (!ResolveDNS.IsValidIPv4(PrivateServerJoinData.Address))
+			// Check if the input field or DNS resolved IP is not valid
+			if (ResolveDNS.CheckIPType(PrivateServerJoinData.Address) == System.Net.Sockets.AddressFamily.Unknown)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Invalid Server IP/Hostname (final check)");
 				__MenuManager.SetLoadingScreen(false, Steamworks.RoomEnter.Error, "Invalid Server IP/Hostname");
@@ -908,6 +908,32 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.Port = LCDirectLan.GetConfig<ushort>("Host", "DefaultPort");
 		}
 
+		[HarmonyPatch("StartHosting")]
+		[HarmonyPrefix]
+		[HarmonyPriority(Priority.VeryLow)]
+		public static void Prefix_StartHosting()
+		{
+			// Do not do anything when not in LAN mode
+			if (!LCDirectLan.IsOnLanMode) { return; }
+
+			// Check if we should not listen on IPv6 instead of IPv4 which is the default
+			if (!LCDirectLan.GetConfig<bool>("Host", "ListenOnIPv6")) {
+				return;
+			}
+
+			UnityTransport a = GameObject.Find("NetworkManager").GetComponent<UnityTransport>();
+
+			// Check if we should listen on localhost or any
+			if (a.ConnectionData.ServerListenAddress == "127.0.0.1") {
+				GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.ServerListenAddress = "::1";
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Server Listen Address changed to IPv6 Localhost/Loopback (::1)");
+				return;
+			}
+
+			GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.ServerListenAddress = "::";
+			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Server Listen Address changed to IPv6 Any Address (::1)");
+		}
+		
 		/// <summary>
 		/// Utility function to change the game's LoadingText value while direct join is on process
 		/// </summary>

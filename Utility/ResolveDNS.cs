@@ -13,6 +13,7 @@
 
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using DnsClient;
 using DnsClient.Protocol;
@@ -111,19 +112,48 @@ namespace LCDirectLAN.Utility
 		}
 
 		/// <summary>
-		/// Check if a string is a valid IPv4 Address using RegEx
+		/// Check if a string is a valid IPv4 Address
 		/// </summary>
-		/// <param name="ip">The string to be tested</param>
+		/// <param name="ip">The string to be checked</param>
 		/// <returns>Boolean representing whether the string is a valid IPv4</returns>
 		public static bool IsValidIPv4(string ip)
         {
             if (IPAddress.TryParse(ip, out IPAddress a))
 			{
-				return a.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork;
+				return a.AddressFamily == AddressFamily.InterNetwork;
 			}
 
 			return false;
         }
+
+		/// <summary>
+		/// Check if a string is a valid IPv6 Address
+		/// </summary>
+		/// <param name="ip">The string to be checked</param>
+		/// <returns>Boolean representing whether the string is a valid IPv6</returns>
+		public static bool IsValidIPv6(string ip)
+		{
+			if (IPAddress.TryParse(ip, out IPAddress a))
+			{
+				return a.AddressFamily == AddressFamily.InterNetworkV6;
+			}
+
+			return false;
+		}
+
+		/// <summary>
+		/// Check if a string is a valid IPv4/IPv6 Address
+		/// </summary>
+		/// <param name="ip">The string to be checked</param>
+		/// <returns>An AddressFamily enum with:<br></br> - InterNetwork for IPv4<br></br> - InterNetworkV6 for IPv6<br></br> - Unknown otherwise.</returns>
+		public static AddressFamily CheckIPType(string ip)
+		{
+			if (IsValidIPv4(ip)) { return AddressFamily.InterNetwork; }
+
+			if (IsValidIPv6(ip)) { return AddressFamily.InterNetworkV6; }
+
+			return AddressFamily.Unknown;
+		}
 
 		public static bool IsOnHostnameFormat(string hostname)
 		{

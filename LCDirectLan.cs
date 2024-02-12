@@ -70,6 +70,7 @@ namespace LCDirectLAN
 			config.Bind<byte>("Join", "HideRawJoinData", 3, new ConfigDescription("Do not display or save the recently joined server data to avoid Server Leak, useful for streamers.\nThis config accepts a bitwise value\nExamples:\n0: Show anything (Disabled/No Hiding)\n1: Hide IP Address\n2. Hide Port Number\n3. Hide IP and Port\n4. Hide Hostname\n7. Hide all of them (IP,Port,Hostname)", new AcceptableValueList<byte>(new byte[] { 0, 1, 2, 3, 4, 7 })));
 
 			/* Default network configuration when hosting LAN lobbies */
+			config.Bind<bool>("Host", "ListenOnIPv6", false, new ConfigDescription("Should the game listen on IPv6 when hosting instead of IPv4 ?\nDual-Stack Listening does not seem to be supported by default, custom implementation coming soon ?"));
 			config.Bind<ushort>("Host", "DefaultPort", 7777, new ConfigDescription("Default Port for hosting, the default vanilla port is 7777"));
 			
 			/* Custom Username Feature / Patches */
