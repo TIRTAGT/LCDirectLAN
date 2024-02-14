@@ -298,6 +298,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			DCSettingsContainer.name = "DCSettingsContainer";
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 250);
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 270);
+			DCSettingsContainer.SetActive(true); // make sure it is not hidden by default
 
 			// Delete PrivatePublicDescription
 			GameObject.Destroy(DCSettingsContainer.transform.GetChild(5).gameObject);
