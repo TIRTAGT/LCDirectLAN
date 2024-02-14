@@ -21,7 +21,7 @@ Checkout the project [Wiki page](../../wiki) for more detailed information such 
 
 - Manual IP and Port input for joining lobby.
 
-- Supports automatic join configuration via DNS (SRV, TXT, A)
+- Supports automatic join configuration via DNS (SRV, TXT, AAAA, A)
 
 - Custom Username support, not related to the Steam Username.
 

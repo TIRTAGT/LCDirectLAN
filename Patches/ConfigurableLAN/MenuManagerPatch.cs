@@ -868,6 +868,30 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 			#endregion
 
+			// IPv6
+			#region AAAA Resolve
+			LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Trying to use DNS AAAA resolve: {RecordName}");
+			if (!silent_resolve) {
+				SetLoadingText("Resolving target host with DNS (AAAA)...");
+
+				// Wait until the game updated the UI
+				yield return new WaitForSeconds(0.25F);
+			}
+
+			string AAAAResolve = ResolveDNS.ResolveAAAARecord(RecordName);
+
+			if (AAAAResolve.Length > 0)
+			{
+				// Resolved using AAAA
+				ResolvedServerData.Address = AAAAResolve;
+
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Resolved AAAA for '{RecordName}' as: {ResolvedServerData.Address}");
+				
+				callback?.Invoke(ResolvedServerData);
+				yield break;
+			}
+			#endregion
+
 			// IPv4
 			#region A Resolve
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Trying to use DNS A resolve: {RecordName}");

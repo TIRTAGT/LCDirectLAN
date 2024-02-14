@@ -52,6 +52,33 @@ namespace LCDirectLAN.Utility
 		}
 
 		/// <summary>
+		/// Resolve a "AAAA" (IPv6) Record
+		/// </summary>
+		/// <param name="record_name">The AAAA record name to resolve</param>
+		/// <returns>The IPv6 address as string, or empty string on failure</returns>
+        public static string ResolveAAAARecord(string record_name)
+        {
+			string result = string.Empty;
+
+			LookupClient a = new LookupClient();
+			IDnsQueryResponse b = a.Query(record_name, QueryType.AAAA, QueryClass.IN);
+
+			if (b.HasError) { return result; }
+
+			for (int i = 0; i < b.Answers.Count; i++)
+			{
+				if (b.Answers[i] == null || !(b.Answers[i] is AaaaRecord)) { continue; }
+
+				AaaaRecord c = (AaaaRecord)b.Answers[i];
+
+				result = c.Address.ToString();
+				break;
+			}
+
+			return result;
+		}
+
+		/// <summary>
 		/// Resolve a TXT Record
 		/// </summary>
 		/// <param name="record_name">The TXT record name to resolve</param>
