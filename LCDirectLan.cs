@@ -23,7 +23,28 @@ namespace LCDirectLAN
 	{
 		public const string PLUGIN_GUID = "TIRTAGT.LCDirectLAN";
 		public const string PLUGIN_NAME = "LCDirectLAN";
-		public const string PLUGIN_VERSION  = "0.1";
+		/// <summary>
+		/// Version of the plugin that follows semantic versioning format<br/>
+		/// 
+		/// <b>Major</b> - Major version number, incremented when there are significant changes that breaks compatibility<br/>
+		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
+		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
+		/// </summary>
+		public const string PLUGIN_VERSION  = "1.0.1";
+		
+		/// <summary>
+		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
+		/// 
+		/// <b>Major</b> - Major version number, incremented when there are significant changes that breaks compatibility<br/>
+		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
+		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
+		/// <b>Revision</b> - Revision number, 00000 (for Debug/Development) or 10101 (for Release)<br/>
+		/// </summary>
+#if DEBUG
+		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".00000";
+#else
+		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".10101";
+#endif
 
 		private readonly Harmony HarmonyLib = new Harmony(LCDirectLan.PLUGIN_GUID);
 		private static LCDirectLan Instance;
