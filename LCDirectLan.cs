@@ -42,8 +42,10 @@ namespace LCDirectLAN
 		/// </summary>
 #if DEBUG
 		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".00000";
+		public const string PLUGIN_COMPILE_CONFIG = "Debug";
 #else
 		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".10101";
+		public const string PLUGIN_COMPILE_CONFIG = "Release";
 #endif
 
 		private readonly Harmony HarmonyLib = new Harmony(LCDirectLan.PLUGIN_GUID);

@@ -20,7 +20,7 @@ using LCDirectLAN;
 // associated with an assembly.
 [assembly: AssemblyTitle(LCDirectLan.PLUGIN_NAME)]
 [assembly: AssemblyDescription(LCDirectLan.PLUGIN_NAME + " is a BepInEx plugin for Lethal Company that fixes and enhances LAN lobbies.")]
-[assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyConfiguration(LCDirectLan.PLUGIN_COMPILE_CONFIG)]
 [assembly: AssemblyCompany("Matthew Tirtawidjaja")]
 [assembly: AssemblyProduct(LCDirectLan.PLUGIN_NAME)]
 [assembly: AssemblyCopyright("Copyright © 2024 Matthew Tirtawidjaja")]
