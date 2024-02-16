@@ -30,7 +30,7 @@ namespace LCDirectLAN
 		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
 		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
 		/// </summary>
-		public const string PLUGIN_VERSION  = "1.0.1";
+		public const string PLUGIN_VERSION  = "1.1.0";
 		
 		/// <summary>
 		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
@@ -106,8 +106,9 @@ namespace LCDirectLAN
 
 			/* Latency HUD Patches */
 			config.Bind<bool>("Latency HUD", "Enabled", true, new ConfigDescription("Enable LatencyHUDPatch ?"));
-			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, this also adds server processing lag to the total latency for more accurate latency representation"));
-			config.Bind<bool>("Latency HUD", "ServerLagWarning", true, new ConfigDescription("Enable Server Lag Warning ?\nThis will notify the client when the server processing lag is too high"));
+			config.Bind<bool>("Latency HUD", "DisableCustomLatencyRPC", false, new ConfigDescription("Disable LCDirectLAN's custom RPC and replace use UnityTransport's GetCurrentRtt() for measuring latency, additional warning feature will be disabled too"));
+			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, which is a more accurate latency representation"));
+			config.Bind<bool>("Latency HUD", "DisplayWarningOnFailure", true, new ConfigDescription("Display an in-game warning when there is a problem with LatencyHUDPatch functionality"));
 			config.Bind<float>("Latency HUD", "Offset_X", 0.0F, new ConfigDescription("Adjust the X position of the Latency HUD\nHigher value moves the HUD to the right, lower value moves the HUD to the left"));
 			config.Bind<float>("Latency HUD", "Offset_Y", 0.0F, new ConfigDescription("Adjust the Y position of the Latency HUD\nHigher value moves the HUD to the top, lower value moves the HUD to the bottom"));
 			config.Bind<float>("Latency HUD", "TextSize", 13.0F, new ConfigDescription("Adjust font size of the Latency HUD (Minimum: 9)"));
