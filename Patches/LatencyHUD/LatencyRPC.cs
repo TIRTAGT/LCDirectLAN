@@ -90,7 +90,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		{
 			if (!LCDirectLan.IsOnLanMode) { return; }
 
-			// If this player object is not controlled by us
+			// Only manage player object that is controlled by us
 			if (!__instance.IsOwner) { return; }
 
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "LatencyRPC.Prefix_OnDestroy()");
@@ -99,7 +99,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			StopTrackingLatency(__instance);
 			UnityTransportObject = null;
 
-			if (__instance.NetworkManager == null) { return; }
+			if (NetworkManager.Singleton == null) { return; }
 
 			// Unregister message handlers
 			NetworkManager.Singleton.CustomMessagingManager.UnregisterNamedMessageHandler(LCDirectLan.PLUGIN_NAME + "_ClientLatencyRequestCallback_ToClientRpc");
