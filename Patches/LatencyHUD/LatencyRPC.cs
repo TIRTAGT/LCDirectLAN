@@ -34,8 +34,6 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_ConnectClientToPlayerObject(PlayerControllerB __instance)
 		{
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "LatencyRPC.Postfix_ConnectClientToPlayerObject()");
 
 			if (__instance.NetworkManager == null || !__instance.NetworkManager.IsListening) { return; }
@@ -94,8 +92,6 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Prefix_OnDestroy(PlayerControllerB __instance)
 		{
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			// Only manage player object that is controlled by us
 			if (!__instance.IsOwner) { return; }
 
@@ -123,8 +119,6 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		/// <param name="__instance">A MonoBehaviour instance in order to be able to start coroutines</param>
 		public static void StartTrackingLatency(MonoBehaviour __instance)
 		{
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "LatencyRPC.StartTrackingLatency()");
 
 			// Avoid starting multiple coroutines

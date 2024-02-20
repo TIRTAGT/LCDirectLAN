@@ -24,9 +24,6 @@ namespace LCDirectLAN.Patches.CustomUsername
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Prefix_ConnectClientToPlayerObject(PlayerControllerB __instance)
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, $"Prefix_ConnectClientToPlayerObject({__instance.actualClientId},{__instance.IsServer},{__instance.IsOwner},{__instance.IsClient})");
 
 			// If this is player is not controlled by us

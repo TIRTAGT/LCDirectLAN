@@ -108,7 +108,7 @@ namespace LCDirectLAN
 
 			/* Latency HUD Patches */
 			config.Bind<bool>("Latency HUD", "Enabled", true, new ConfigDescription("Enable LatencyHUDPatch ?"));
-			config.Bind<bool>("Latency HUD", "DisableCustomLatencyRPC", false, new ConfigDescription("Disable LCDirectLAN's custom RPC and replace use UnityTransport's GetCurrentRtt() for measuring latency, additional warning feature will be disabled too"));
+			config.Bind<bool>("Latency HUD", "DisableCustomLatencyRPC", false, new ConfigDescription($"Disable {LCDirectLan.PLUGIN_NAME}'s custom RPC and replace use UnityTransport's GetCurrentRtt() for measuring latency, additional warning feature will be disabled too"));
 			config.Bind<bool>("Latency HUD", "HideHUDWhileHosting", true, new ConfigDescription("Hide the Latency HUD when hosting a game, since measuring latency to host (yourself) is not really useful"));
 			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, which is a more accurate latency representation"));
 			config.Bind<bool>("Latency HUD", "DisplayWarningOnFailure", true, new ConfigDescription("Display an in-game warning when there is a problem with LatencyHUDPatch functionality"));
@@ -118,7 +118,23 @@ namespace LCDirectLAN
 
 			config.Save();
 
+			// Inject script to detect if we are started in LAN or Online mode
+			Patches.PreInitSceneScriptPatch.SetLateInjector(InjectPatches);
 			HarmonyLib.PatchAll(typeof(Patches.PreInitSceneScriptPatch));
+
+			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} is loaded");
+		}
+
+		/// <summary>
+		/// A dedicated inject method to apply patches (allows early or late patching behavior)
+		/// </summary>
+		private void InjectPatches() {
+			// Do not inject any further patches if we are not in LAN mode
+			if (!LCDirectLan.IsOnLanMode) {
+				this.Logger.LogError($"{LCDirectLan.PLUGIN_NAME} should not be injected when game is started on Online (steam) mode");
+				return;
+			}
+
 			HarmonyLib.PatchAll(typeof(Patches.ConfigurableLAN.MenuManagerPatch));
 
 			// Only apply username patches if user wants to
@@ -141,7 +157,7 @@ namespace LCDirectLAN
 				HarmonyLib.PatchAll(typeof(Patches.LatencyHUD.LatencyRPC));
 			}
 
-			this.Logger.LogInfo("sucessfully loaded.");
+			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} patches are injected");
 		}
 
 		/// <summary>

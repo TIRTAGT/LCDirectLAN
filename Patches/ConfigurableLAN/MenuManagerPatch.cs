@@ -125,9 +125,6 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		{
 			if (___isInitScene) { return; }
 
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			__MenuManager = __instance;
 
 			PublicServerJoinData = new PlayerJoinData(
@@ -932,9 +929,6 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Prefix_ClickHostButton()
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.Port = LCDirectLan.GetConfig<ushort>("Host", "DefaultPort");
 		}
 
@@ -943,9 +937,6 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Prefix_StartHosting()
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			// Check if we should not listen on IPv6 instead of IPv4 which is the default
 			if (!LCDirectLan.GetConfig<bool>("Host", "ListenOnIPv6")) {
 				return;

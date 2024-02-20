@@ -31,9 +31,6 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_Awake(HUDManager __instance)
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-			
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "HUDManager.Postfix_Awake()");
 
 			GameObject Container = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD");
@@ -108,8 +105,6 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_Update()
 		{
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			// Lock unnecessary update to prevent performance issues
 			if (UpdateLock) { return; }
 			UpdateLock = true;
