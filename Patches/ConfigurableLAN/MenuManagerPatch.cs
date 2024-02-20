@@ -695,16 +695,21 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			// If we should remember the current join information
 			if (LCDirectLan.GetConfig<bool>("Join", "RememberLastJoinSettings"))
 			{
-				// Check if we should save the Join DefaultAddress
-				if ((HideJoinData & 1) == 0)
-				{
-					LCDirectLan.SetConfig("Join", "DefaultAddress", PrivateServerJoinData.Address);
+				// Check if we should hide IP Address and the address is an IP
+				if ((HideJoinData & 1) == 1 && ResolveDNS.CheckIPType(PublicServerJoinData.Address) != System.Net.Sockets.AddressFamily.Unknown) {
+					// Don't save IP Address
 				}
 				else {
-					LCDirectLan.SetConfig("Join", "DefaultAddress", PublicServerJoinData.Address);
+					// Check if we should hide Hostname and the address is a hostname
+					if ((HideJoinData & 4) == 4 && ResolveDNS.IsOnHostnameFormat(PublicServerJoinData.Address)) {
+						// Don't save Hostname
+					}
+					else {
+						LCDirectLan.SetConfig("Join", "DefaultAddress", PublicServerJoinData.Address);
+					}
 				}
 
-				// Check if we should save the Join DefaultPort
+				// Check if we should save Port Number
 				if ((HideJoinData & 2) == 0)
 				{
 					LCDirectLan.SetConfig("Join", "DefaultPort", PrivateServerJoinData.Port);
