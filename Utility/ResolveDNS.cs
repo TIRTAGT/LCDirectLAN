@@ -34,8 +34,17 @@ namespace LCDirectLAN.Utility
 			string result = string.Empty;
 
 			LookupClient a = new LookupClient();
-			IDnsQueryResponse b = a.Query(record_name, QueryType.A, QueryClass.IN);
+			IDnsQueryResponse b = null;
 
+			try {
+				b = a.Query(record_name, QueryType.A, QueryClass.IN);
+			}
+			catch(SocketException e)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve A Record: " + e.Message);
+			}
+
+			if (b == null) { return result; }
 			if (b.HasError) { return result; }
 
 			for (int i = 0; i < b.Answers.Count; i++)
@@ -61,8 +70,18 @@ namespace LCDirectLAN.Utility
 			string result = string.Empty;
 
 			LookupClient a = new LookupClient();
-			IDnsQueryResponse b = a.Query(record_name, QueryType.AAAA, QueryClass.IN);
+			IDnsQueryResponse b = null;
 
+			try
+			{
+				b = a.Query(record_name, QueryType.AAAA, QueryClass.IN);
+			}
+			catch (SocketException e)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve AAAA Record: " + e.Message);
+			}
+
+			if (b == null) { return result; }
 			if (b.HasError) { return result; }
 
 			for (int i = 0; i < b.Answers.Count; i++)
@@ -88,8 +107,18 @@ namespace LCDirectLAN.Utility
             string result = string.Empty;
 
             LookupClient a = new LookupClient();
-            IDnsQueryResponse b = a.Query(record_name, QueryType.TXT, QueryClass.IN);
+            IDnsQueryResponse b = null;
+
+			try
+			{
+				b = a.Query(record_name, QueryType.TXT, QueryClass.IN);
+			}
+			catch (SocketException e)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve TXT Record: " + e.Message);
+			}
             
+			if (b == null) { return result; }
             if (b.HasError) { return result; }
 
             for (int i = 0; i < b.Answers.Count; i++)
@@ -119,8 +148,19 @@ namespace LCDirectLAN.Utility
 			(string, UInt16) result = (string.Empty, 0);
 
 			LookupClient a = new LookupClient();
-			IDnsQueryResponse b = a.Query(record_name, QueryType.SRV, QueryClass.IN);
+			IDnsQueryResponse b = null;
 
+			try
+			{
+				b = a.Query(record_name, QueryType.SRV, QueryClass.IN);
+			}
+			catch (SocketException e)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve SRV Record: " + e.Message);
+				return result;
+			}
+
+			if (b == null) { return result; }
 			if (b.HasError) { return result; }
 
 			for (int i = 0; i < b.Answers.Count; i++)
