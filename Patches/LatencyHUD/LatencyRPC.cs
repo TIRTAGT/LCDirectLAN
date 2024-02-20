@@ -79,6 +79,12 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler(LCDirectLan.PLUGIN_NAME + "_ServerLatencyRequestCallback_ToServerRpc", new CustomMessagingManager.HandleNamedMessageDelegate(ServerLatencyRequestCallback));
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, $"Listening _ServerLatencyRequestCallback_ToServerRpc()");
 
+			// Check if we shouldn't track latency to ourself
+			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideHUDWhileHosting") && NetworkManager.Singleton.IsServer) {
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Not tracking latency as a server !");
+				return;
+			}
+
 			// As a server, start tracking latency here
 			StartTrackingLatency(__instance);
 		}

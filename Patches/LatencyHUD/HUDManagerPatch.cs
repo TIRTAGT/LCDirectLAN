@@ -13,6 +13,7 @@
 
 using HarmonyLib;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace LCDirectLAN.Patches.LatencyHUD
@@ -47,6 +48,17 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			if (a != null) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "LatencyHUD already exists !");
 				LatencyHUD = a;
+				return;
+			}
+
+			if (NetworkManager.Singleton == null) {
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "NetworkManager.Singleton is null !");
+				return;
+			}
+
+			// Check if we shouldn't track latency to ourself
+			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideHUDWhileHosting") && NetworkManager.Singleton.IsServer) {
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Latency HUD is disabled while hosting !");
 				return;
 			}
 

@@ -109,6 +109,7 @@ namespace LCDirectLAN
 			/* Latency HUD Patches */
 			config.Bind<bool>("Latency HUD", "Enabled", true, new ConfigDescription("Enable LatencyHUDPatch ?"));
 			config.Bind<bool>("Latency HUD", "DisableCustomLatencyRPC", false, new ConfigDescription("Disable LCDirectLAN's custom RPC and replace use UnityTransport's GetCurrentRtt() for measuring latency, additional warning feature will be disabled too"));
+			config.Bind<bool>("Latency HUD", "HideHUDWhileHosting", true, new ConfigDescription("Hide the Latency HUD when hosting a game, since measuring latency to host (yourself) is not really useful"));
 			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, which is a more accurate latency representation"));
 			config.Bind<bool>("Latency HUD", "DisplayWarningOnFailure", true, new ConfigDescription("Display an in-game warning when there is a problem with LatencyHUDPatch functionality"));
 			config.Bind<float>("Latency HUD", "Offset_X", 0.0F, new ConfigDescription("Adjust the X position of the Latency HUD\nHigher value moves the HUD to the right, lower value moves the HUD to the left"));
