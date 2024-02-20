@@ -67,7 +67,13 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /d /y &quot;$(ProjectDir)packages\dnsclient\1.7.0\lib\netstandard2.1\DnsClient.dll&quot; &quot;$(TargetDir)libs\DnsClient.1.7.0\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /d /y &quot;$(ProjectDir)packages\dnsclient\1.7.0\README.md&quot; &quot;$(TargetDir)libs\DnsClient.1.7.0\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /d /y &quot;$(ProjectDir)packages\system.buffers\4.5.1\LICENSE.TXT&quot; &quot;$(TargetDir)libs\System.Buffers.4.5.1\&quot;&#xD;&#xA;rename &quot;$(TargetDir)libs\System.Buffers.4.5.1\LICENSE.TXT&quot; &quot;LICENSE&quot;&#xD;&#xA;&#xD;&#xA;xcopy /d /y &quot;$(ProjectDir)packages\system.buffers\4.5.1\THIRD-PARTY-NOTICES.TXT&quot; &quot;$(TargetDir)libs\System.Buffers.4.5.1\&quot;&#xD;&#xA;rename &quot;$(TargetDir)libs\System.Buffers.4.5.1\THIRD-PARTY-NOTICES.TXT&quot; &quot;THIRD-PARTY-NOTICES&quot;&#xD;&#xA;&#xD;&#xA;xcopy /d /y &quot;$(ProjectDir)packages\system.buffers\4.5.1\version.txt&quot; &quot;$(TargetDir)libs\System.Buffers.4.5.1\&quot;&#xD;&#xA;rename &quot;$(TargetDir)libs\System.Buffers.4.5.1\version.txt&quot; &quot;version&quot;&#xD;&#xA;&#xD;&#xA;xcopy /d /y &quot;$(ProjectDir)packages\system.buffers\4.5.1\lib\netstandard2.0\System.Buffers.dll&quot; &quot;$(TargetDir)libs\System.Buffers.4.5.1\&quot;" />
+	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.7.0\lib\netstandard2.1\DnsClient.dll" DestinationFiles="$(TargetDir)libs\DnsClient.1.7.0\DnsClient.dll" />
+	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.7.0\README.md" DestinationFiles="$(TargetDir)libs\DnsClient.1.7.0\README.md" />
+	
+	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\LICENSE.TXT" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\LICENSE" />
+	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\THIRD-PARTY-NOTICES.TXT" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\THIRD-PARTY-NOTICES" />
+	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\version.txt" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\version" />
+	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\lib\netstandard2.0\System.Buffers.dll" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\netstandard2.0\System.Buffers.dll" />
   </Target>
   <Target Name="SpicNSpan" AfterTargets="Clean">
     <RemoveDir Directories="$(TargetDir)" />
