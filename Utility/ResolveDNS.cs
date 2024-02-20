@@ -169,8 +169,38 @@ namespace LCDirectLAN.Utility
 
 				SrvRecord c = (SrvRecord)b.Answers[i];
 
-				// Get IP Address of the target hostname
-				result.Item1 = ResolveDNS.ResolveARecord(c.Target.Value);
+				// Check if we should prioritize IPv6 lookup for the SRV Host
+				if (LCDirectLan.GetConfig<bool>("Join", "SRVHost_PreferIPv6")) {
+					// Try get host address via AAAA Record first
+					result.Item1 = ResolveAAAARecord(c.Target.Value);
+
+					if (string.IsNullOrEmpty(result.Item1))
+					{
+						// Try get host address using A Record as fallback
+						result.Item1 = ResolveARecord(c.Target.Value);
+						LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using A Record");
+					}
+					else {
+						LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using AAAA Record");
+					}
+
+					result.Item2 = c.Port;
+					break;
+				}
+
+				// Try get host address via A Record first
+				result.Item1 = ResolveARecord(c.Target.Value);
+
+				if (string.IsNullOrEmpty(result.Item1))
+				{
+					// Try get host address using AAAA Record as fallback
+					result.Item1 = ResolveAAAARecord(c.Target.Value);
+					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using AAAA Record");
+				}
+				else {
+					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using A Record");
+				}
+
 				result.Item2 = c.Port;
 				break;
 			}
