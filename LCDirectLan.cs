@@ -94,7 +94,7 @@ namespace LCDirectLAN
 			config.Bind<bool>("Join", "SRVHost_PreferIPv6", false, new ConfigDescription("Prefer IPv6 over IPv4 for SRV Record host lookup when using DNS SRV Record to join"));
 
 			/* Default network configuration when hosting LAN lobbies */
-			config.Bind<bool>("Host", "ListenOnIPv6", false, new ConfigDescription("Should the game listen on IPv6 when hosting instead of IPv4 ?\nDual-Stack Listening does not seem to be supported by default, custom implementation coming soon ?"));
+			config.Bind<bool>("Host", "ListenOnIPv6", false, new ConfigDescription("Should the game listen on IPv6 when hosting instead of IPv4 ?\nDual-Stack Listening is not supported due to the game Unity Transport version."));
 			config.Bind<ushort>("Host", "DefaultPort", 7777, new ConfigDescription("Default Port for hosting, the default vanilla port is 7777"));
 			
 			/* Custom Username Feature / Patches */
