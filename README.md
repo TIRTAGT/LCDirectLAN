@@ -1,5 +1,15 @@
 # LCDirectLAN
 
+![GitHub Release](https://img.shields.io/github/v/release/TIRTAGT/LCDirectLAN?sort=semver&display_name=release&label=Latest%20Release&cacheSeconds=10800&color=92c00a)
+![GitHub Repo stars](https://img.shields.io/github/stars/TIRTAGT/LCDirectLAN?label=GitHub%20Stars&style=flat&color=92c00a)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/TIRTAGT/LCDirectLAN/total?label=GitHub%20Downloads&color=92c00a)
+![GitHub License](https://img.shields.io/github/license/TIRTAGT/LCDirectLAN?cacheSeconds=86400&color=92c00a)
+![Thunderstore Version](https://img.shields.io/thunderstore/v/TIRTAGT/LCDirectLAN?label=Thunderstore%20Version)
+![Thunderstore Likes](https://img.shields.io/thunderstore/likes/TIRTAGT/LCDirectLAN?style=flat&label=Thunderstore%20Likes&color=0b7dbe)
+![Thunderstore Downloads](https://img.shields.io/thunderstore/dt/TIRTAGT/LCDirectLAN?label=Thunderstore%20Downloads&color=0b7dbe)
+
+
+
 <img align="left" width="50%" src="./assets/repository/icon.png"/>
 
 LCDirectLAN is a mod for Lethal Company that is built around BepInEx to fix and enhances LAN lobbies without interfering with the Steam-networked lobbies.
@@ -21,7 +31,7 @@ Checkout the project [Wiki page](../../wiki) for more detailed information such 
 
 - Manual IP and Port input for joining lobby.
 
-- Supports automatic join configuration via DNS (SRV, TXT, A)
+- Supports automatic join configuration via DNS (SRV, TXT, AAAA, A)
 
 - Custom Username support, not related to the Steam Username.
 

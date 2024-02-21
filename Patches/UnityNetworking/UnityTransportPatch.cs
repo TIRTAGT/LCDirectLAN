@@ -25,9 +25,6 @@ namespace LCDirectLAN.Patches.UnityNetworking
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_Awake(NetworkManager __instance)
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			UnityTransport UTP = __instance.GetComponent<UnityTransport>();
 
 			if (UTP == null)

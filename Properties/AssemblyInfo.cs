@@ -12,17 +12,17 @@
 **/
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using LCDirectLAN;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("LCDirectLAN")]
-[assembly: AssemblyDescription("LCDirectLAN is a BepInEx plugin for Lethal Company that fixes and enhances LAN lobbies.")]
-[assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyTitle(LCDirectLan.PLUGIN_NAME)]
+[assembly: AssemblyDescription(LCDirectLan.PLUGIN_NAME + " is a BepInEx plugin for Lethal Company that fixes and enhances LAN lobbies.")]
+[assembly: AssemblyConfiguration(LCDirectLan.PLUGIN_COMPILE_CONFIG)]
 [assembly: AssemblyCompany("Matthew Tirtawidjaja")]
-[assembly: AssemblyProduct("LCDirectLAN")]
+[assembly: AssemblyProduct(LCDirectLan.PLUGIN_NAME)]
 [assembly: AssemblyCopyright("Copyright © 2024 Matthew Tirtawidjaja")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -43,6 +43,7 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion(LCDirectLan.PLUGIN_ASSEMBLY_VERSION)]
+[assembly: AssemblyFileVersion(LCDirectLan.PLUGIN_ASSEMBLY_VERSION)]
+[assembly: AssemblyInformationalVersion(LCDirectLan.PLUGIN_VERSION)]
 [assembly: AssemblyTrademark("Matthew Tirtawidjaja")]

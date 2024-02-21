@@ -125,9 +125,6 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		{
 			if (___isInitScene) { return; }
 
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			__MenuManager = __instance;
 
 			PublicServerJoinData = new PlayerJoinData(
@@ -149,8 +146,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			if (HideJoinData > 0) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Applying server leak protection based on HideRawJoinData's bitwise value: {HideJoinData}");
 
-					// Check if we should hide IP Address
-				if ((HideJoinData & 1) == 1 && !string.IsNullOrEmpty(PublicServerJoinData.Address) && ResolveDNS.IsValidIPv4(PublicServerJoinData.Address)) {
+				// Check if we should hide IP Address
+				if ((HideJoinData & 1) == 1 && !string.IsNullOrEmpty(PublicServerJoinData.Address) && ResolveDNS.CheckIPType(PublicServerJoinData.Address) != System.Net.Sockets.AddressFamily.Unknown) {
 					PublicServerJoinData.Address = "";
 					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "Server IP Address from config is cleared !");
 				}
@@ -298,6 +295,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			DCSettingsContainer.name = "DCSettingsContainer";
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 250);
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 270);
+			DCSettingsContainer.SetActive(true); // make sure it is not hidden by default
 
 			// Delete PrivatePublicDescription
 			GameObject.Destroy(DCSettingsContainer.transform.GetChild(5).gameObject);
@@ -373,7 +371,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			GameObject ServerNameField_GameObject = DCSettingsContainer.transform.Find("ServerNameField").gameObject;
 			ServerNameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 110, 0), ServerNameField_GameObject.transform.localRotation);
 			TMP_InputField ServerNameInputField = ServerNameField_GameObject.GetComponent<TMP_InputField>();
-			((TextMeshProUGUI)ServerNameInputField.placeholder).text = "127.0.0.1";
+			((TextMeshProUGUI)ServerNameInputField.placeholder).text = "";
 			ServerNameInputField.text = "";
 			ServerNameInputField.onValueChanged.AddListener(new UnityEngine.Events.UnityAction<string>(OnServerNameInputField_Changed));
 
@@ -621,7 +619,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 
 			// Check if the input looks like a valid hostname
-			if (!ResolveDNS.IsValidIPv4(PrivateServerJoinData.Address) && ResolveDNS.IsOnHostnameFormat(PrivateServerJoinData.Address)) {
+			if (ResolveDNS.CheckIPType(PrivateServerJoinData.Address) == System.Net.Sockets.AddressFamily.Unknown && ResolveDNS.IsOnHostnameFormat(PrivateServerJoinData.Address)) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "Detected a valid hostname, trying to resolve it...");
 
 				__MenuManager.StartCoroutine(PerformDNSAutoConfigure(PrivateServerJoinData.Address, false, ResolvedData => {
@@ -668,8 +666,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		/// Continue the direct join connect process (this is used to make ASYNC DNS resolve compatible with non-DNS connect)
 		/// </summary>
 		private static void ContinueDirectJoinConnect() {
-			// Check if this is not a valid IPv4 (also checks if the DNS resolved IP is valid too)
-			if (!ResolveDNS.IsValidIPv4(PrivateServerJoinData.Address))
+			// Check if the input field or DNS resolved IP is not valid
+			if (ResolveDNS.CheckIPType(PrivateServerJoinData.Address) == System.Net.Sockets.AddressFamily.Unknown)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Invalid Server IP/Hostname (final check)");
 				__MenuManager.SetLoadingScreen(false, Steamworks.RoomEnter.Error, "Invalid Server IP/Hostname");
@@ -694,16 +692,21 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			// If we should remember the current join information
 			if (LCDirectLan.GetConfig<bool>("Join", "RememberLastJoinSettings"))
 			{
-				// Check if we should save the Join DefaultAddress
-				if ((HideJoinData & 1) == 0)
-				{
-					LCDirectLan.SetConfig("Join", "DefaultAddress", PrivateServerJoinData.Address);
+				// Check if we should hide IP Address and the address is an IP
+				if ((HideJoinData & 1) == 1 && ResolveDNS.CheckIPType(PublicServerJoinData.Address) != System.Net.Sockets.AddressFamily.Unknown) {
+					// Don't save IP Address
 				}
 				else {
-					LCDirectLan.SetConfig("Join", "DefaultAddress", PublicServerJoinData.Address);
+					// Check if we should hide Hostname and the address is a hostname
+					if ((HideJoinData & 4) == 4 && ResolveDNS.IsOnHostnameFormat(PublicServerJoinData.Address)) {
+						// Don't save Hostname
+					}
+					else {
+						LCDirectLan.SetConfig("Join", "DefaultAddress", PublicServerJoinData.Address);
+					}
 				}
 
-				// Check if we should save the Join DefaultPort
+				// Check if we should save Port Number
 				if ((HideJoinData & 2) == 0)
 				{
 					LCDirectLan.SetConfig("Join", "DefaultPort", PrivateServerJoinData.Port);
@@ -868,6 +871,30 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 			#endregion
 
+			// IPv6
+			#region AAAA Resolve
+			LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Trying to use DNS AAAA resolve: {RecordName}");
+			if (!silent_resolve) {
+				SetLoadingText("Resolving target host with DNS (AAAA)...");
+
+				// Wait until the game updated the UI
+				yield return new WaitForSeconds(0.25F);
+			}
+
+			string AAAAResolve = ResolveDNS.ResolveAAAARecord(RecordName);
+
+			if (AAAAResolve.Length > 0)
+			{
+				// Resolved using AAAA
+				ResolvedServerData.Address = AAAAResolve;
+
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Resolved AAAA for '{RecordName}' as: {ResolvedServerData.Address}");
+				
+				callback?.Invoke(ResolvedServerData);
+				yield break;
+			}
+			#endregion
+
 			// IPv4
 			#region A Resolve
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"Trying to use DNS A resolve: {RecordName}");
@@ -902,12 +929,32 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Prefix_ClickHostButton()
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-
 			GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.Port = LCDirectLan.GetConfig<ushort>("Host", "DefaultPort");
 		}
 
+		[HarmonyPatch("StartHosting")]
+		[HarmonyPrefix]
+		[HarmonyPriority(Priority.VeryLow)]
+		public static void Prefix_StartHosting()
+		{
+			// Check if we should not listen on IPv6 instead of IPv4 which is the default
+			if (!LCDirectLan.GetConfig<bool>("Host", "ListenOnIPv6")) {
+				return;
+			}
+
+			UnityTransport a = GameObject.Find("NetworkManager").GetComponent<UnityTransport>();
+
+			// Check if we should listen on localhost or any
+			if (a.ConnectionData.ServerListenAddress == "127.0.0.1") {
+				GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.ServerListenAddress = "::1";
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Server Listen Address changed to IPv6 Localhost/Loopback (::1)");
+				return;
+			}
+
+			GameObject.Find("NetworkManager").GetComponent<UnityTransport>().ConnectionData.ServerListenAddress = "::";
+			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Server Listen Address changed to IPv6 Any Address (::1)");
+		}
+		
 		/// <summary>
 		/// Utility function to change the game's LoadingText value while direct join is on process
 		/// </summary>

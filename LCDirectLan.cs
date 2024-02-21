@@ -23,7 +23,30 @@ namespace LCDirectLAN
 	{
 		public const string PLUGIN_GUID = "TIRTAGT.LCDirectLAN";
 		public const string PLUGIN_NAME = "LCDirectLAN";
-		public const string PLUGIN_VERSION  = "0.1";
+		/// <summary>
+		/// Version of the plugin that follows semantic versioning format<br/>
+		/// 
+		/// <b>Major</b> - Major version number, incremented when there are significant changes that breaks compatibility<br/>
+		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
+		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
+		/// </summary>
+		public const string PLUGIN_VERSION  = "1.1.0";
+		
+		/// <summary>
+		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
+		/// 
+		/// <b>Major</b> - Major version number, incremented when there are significant changes that breaks compatibility<br/>
+		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
+		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
+		/// <b>Revision</b> - Revision number, 00000 (for Debug/Development) or 10101 (for Release)<br/>
+		/// </summary>
+#if DEBUG
+		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".00000";
+		public const string PLUGIN_COMPILE_CONFIG = "Debug";
+#else
+		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".10101";
+		public const string PLUGIN_COMPILE_CONFIG = "Release";
+#endif
 
 		private readonly Harmony HarmonyLib = new Harmony(LCDirectLan.PLUGIN_GUID);
 		private static LCDirectLan Instance;
@@ -68,8 +91,10 @@ namespace LCDirectLAN
 			config.Bind<ushort>("Join", "DefaultPort", 7777, new ConfigDescription("Default Port, change-able in the game"));
 			config.Bind<bool>("Join", "RememberLastJoinSettings", false, new ConfigDescription("Overwrite the default join configuration values when changed in the game"));
 			config.Bind<byte>("Join", "HideRawJoinData", 3, new ConfigDescription("Do not display or save the recently joined server data to avoid Server Leak, useful for streamers.\nThis config accepts a bitwise value\nExamples:\n0: Show anything (Disabled/No Hiding)\n1: Hide IP Address\n2. Hide Port Number\n3. Hide IP and Port\n4. Hide Hostname\n7. Hide all of them (IP,Port,Hostname)", new AcceptableValueList<byte>(new byte[] { 0, 1, 2, 3, 4, 7 })));
+			config.Bind<bool>("Join", "SRVHost_PreferIPv6", false, new ConfigDescription("Prefer IPv6 over IPv4 for SRV Record host lookup when using DNS SRV Record to join"));
 
 			/* Default network configuration when hosting LAN lobbies */
+			config.Bind<bool>("Host", "ListenOnIPv6", false, new ConfigDescription("Should the game listen on IPv6 when hosting instead of IPv4 ?\nDual-Stack Listening is not supported due to the game Unity Transport version."));
 			config.Bind<ushort>("Host", "DefaultPort", 7777, new ConfigDescription("Default Port for hosting, the default vanilla port is 7777"));
 			
 			/* Custom Username Feature / Patches */
@@ -84,15 +109,33 @@ namespace LCDirectLAN
 
 			/* Latency HUD Patches */
 			config.Bind<bool>("Latency HUD", "Enabled", true, new ConfigDescription("Enable LatencyHUDPatch ?"));
-			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, this also adds server processing lag to the total latency for more accurate latency representation"));
-			config.Bind<bool>("Latency HUD", "ServerLagWarning", true, new ConfigDescription("Enable Server Lag Warning ?\nThis will notify the client when the server processing lag is too high"));
+			config.Bind<bool>("Latency HUD", "DisableCustomLatencyRPC", false, new ConfigDescription($"Disable {LCDirectLan.PLUGIN_NAME}'s custom RPC and replace use UnityTransport's GetCurrentRtt() for measuring latency, additional warning feature will be disabled too"));
+			config.Bind<bool>("Latency HUD", "HideHUDWhileHosting", true, new ConfigDescription("Hide the Latency HUD when hosting a game, since measuring latency to host (yourself) is not really useful"));
+			config.Bind<bool>("Latency HUD", "RTTMeasurement", true, new ConfigDescription("Measure Round Trip Time (RTT) instead of one-way latency, which is a more accurate latency representation"));
+			config.Bind<bool>("Latency HUD", "DisplayWarningOnFailure", true, new ConfigDescription("Display an in-game warning when there is a problem with LatencyHUDPatch functionality"));
 			config.Bind<float>("Latency HUD", "Offset_X", 0.0F, new ConfigDescription("Adjust the X position of the Latency HUD\nHigher value moves the HUD to the right, lower value moves the HUD to the left"));
 			config.Bind<float>("Latency HUD", "Offset_Y", 0.0F, new ConfigDescription("Adjust the Y position of the Latency HUD\nHigher value moves the HUD to the top, lower value moves the HUD to the bottom"));
 			config.Bind<float>("Latency HUD", "TextSize", 13.0F, new ConfigDescription("Adjust font size of the Latency HUD (Minimum: 9)"));
 
 			config.Save();
 
+			// Inject script to detect if we are started in LAN or Online mode
+			Patches.PreInitSceneScriptPatch.SetLateInjector(InjectPatches);
 			HarmonyLib.PatchAll(typeof(Patches.PreInitSceneScriptPatch));
+
+			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} is loaded");
+		}
+
+		/// <summary>
+		/// A dedicated inject method to apply patches (allows early or late patching behavior)
+		/// </summary>
+		private void InjectPatches() {
+			// Do not inject any further patches if we are not in LAN mode
+			if (!LCDirectLan.IsOnLanMode) {
+				this.Logger.LogError($"{LCDirectLan.PLUGIN_NAME} should not be injected when game is started on Online (steam) mode");
+				return;
+			}
+
 			HarmonyLib.PatchAll(typeof(Patches.ConfigurableLAN.MenuManagerPatch));
 
 			// Only apply username patches if user wants to
@@ -115,7 +158,7 @@ namespace LCDirectLAN
 				HarmonyLib.PatchAll(typeof(Patches.LatencyHUD.LatencyRPC));
 			}
 
-			this.Logger.LogInfo("sucessfully loaded.");
+			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} patches are injected");
 		}
 
 		/// <summary>

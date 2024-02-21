@@ -13,6 +13,7 @@
 
 using HarmonyLib;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace LCDirectLAN.Patches.LatencyHUD
@@ -23,15 +24,13 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		private static GameObject LatencyHUD = null;
 		private static TextMeshProUGUI LatencyHUD_TMP = null;
 		private static ulong LatencyValue = 0;
+		private static bool UpdateLock = false;
 
 		[HarmonyPatch("Awake")]
 		[HarmonyPostfix]
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_Awake(HUDManager __instance)
 		{
-			// Do not do anything when not in LAN mode
-			if (!LCDirectLan.IsOnLanMode) { return; }
-			
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "HUDManager.Postfix_Awake()");
 
 			GameObject Container = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD");
@@ -46,6 +45,17 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			if (a != null) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "LatencyHUD already exists !");
 				LatencyHUD = a;
+				return;
+			}
+
+			if (NetworkManager.Singleton == null) {
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "NetworkManager.Singleton is null !");
+				return;
+			}
+
+			// Check if we shouldn't track latency to ourself
+			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideHUDWhileHosting") && NetworkManager.Singleton.IsServer) {
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Latency HUD is disabled while hosting !");
 				return;
 			}
 
@@ -95,19 +105,26 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		[HarmonyPriority(Priority.VeryLow)]
 		public static void Postfix_Update()
 		{
-			if (!LCDirectLan.IsOnLanMode) { return; }
+			// Lock unnecessary update to prevent performance issues
+			if (UpdateLock) { return; }
+			UpdateLock = true;
 
 			if (LatencyHUD_TMP == null) { return; }
 
 			// Update the latency HUD
-			// If latency is quite high, change the color to red
-			if (LatencyValue > 1500) {
+			if (LatencyValue > 600)
+			{
+				// Change the color to red
 				LatencyHUD_TMP.color = new Color(1, 0, 0, 1);
 			}
-			else if (LatencyValue > 150) {
+			else if (LatencyValue > 300)
+			{
+				// Change the color to orange (similar to the game's color scheme)
 				LatencyHUD_TMP.color = new Color(0.9528F, 0.3941F, 0, 1);
 			}
-			else {
+			else
+			{
+				// Change the color to green
 				LatencyHUD_TMP.color = new Color(0, 1, 0, 1);
 			}
 
@@ -123,21 +140,30 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			if (LatencyHUD_TMP == null) { return; }
 
 			LatencyValue = latency;
+			UpdateLock = false;
 		}
 
 		/// <summary>
-		/// Send a warning to the client when the server processing lag is too high
+		/// Send warning using the in-game warning dialog
 		/// </summary>
-		/// <param name="ProcessingTime">The server processing time in ms</param>
-		public static void SendServerLagWarning(ushort ProcessingTime) {
-			if (LatencyHUD_TMP == null) { return; }
+		/// <param name="message">The message of the warning</param>
+		public static void DisplayHUDWarning(string message) {
+			// Make sure we are allowed to send the warning
+			if (!LCDirectLan.GetConfig<bool>("Latency HUD", "DisplayWarningOnFailure")) { return; }
 
-			// Check if we should notify the client when the server processing lag is too high
-			if (!LCDirectLan.GetConfig<bool>("Latency HUD", "ServerLagWarning")) {
-				return;
+			HUDManager.Instance.DisplayTip("LCDirectLAN - Latency HUD", message, false, false);
+		}
+
+		/// <summary>
+		/// Destroy the latency HUD GameObject
+		/// </summary>
+		public static void DestroyLatencyHUD() {
+			if (LatencyHUD != null) {
+				LatencyHUD.SetActive(false);
+				LatencyHUD_TMP = null;
+				GameObject.Destroy(LatencyHUD);
+				LatencyHUD = null;
 			}
-
-			HUDManager.Instance.DisplayTip("LCDirectLAN - Slow Server", $"Internal Server Processing is slow, this will impact your ping ({ProcessingTime}ms)", false, false);
 		}
 	}
 }
