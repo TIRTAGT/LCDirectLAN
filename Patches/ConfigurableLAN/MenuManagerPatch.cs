@@ -62,7 +62,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			IsPortValid = false;
 		}
 
-		private ushort _Port;
+		private ushort _Port = 0;
 		public ushort Port {
 			get {
 				return _Port;
@@ -379,7 +379,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			ServerPortField_GameObject.name = "ServerPortField";
 			ServerPortField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 62, 0), ServerPortField_GameObject.transform.localRotation);
 			TMP_InputField ServerPortInputField = ServerPortField_GameObject.GetComponent<TMP_InputField>();
-			((TextMeshProUGUI)ServerPortInputField.placeholder).text = "7777";
+			((TextMeshProUGUI)ServerPortInputField.placeholder).text = LCDirectLan.GetConfig<ushort>("Join", "DefaultPort").ToString();
 			ServerPortInputField.text = "";
 			ServerPortInputField.onValueChanged.AddListener(new UnityEngine.Events.UnityAction<string>(OnServerPortInputField_Changed));
 
@@ -570,6 +570,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		{
 			DirectConnectWindow.SetActive(false);
 
+			SetLoadingText("Connecting to server");
 			__MenuManager.SetLoadingScreen(true);
 
 			// If there is no DNS-resolved IP, use the input field
@@ -588,9 +589,20 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 				// Make sure the port in input is valid if we aren't auto configuring with DNS
 				if (!IsAHostname && !PublicServerJoinData.IsPortValid)
 				{
-					// Invalid port
-					__MenuManager.SetLoadingScreen(false, Steamworks.RoomEnter.Error, "Invalid Server Port, please check the input field");
-					return;
+					// If the port is empty, set it to default based on config
+					if (PublicServerJoinData.Port == 0) {
+						PublicServerJoinData.SetPort(LCDirectLan.GetConfig<ushort>("Join", "DefaultPort").ToString());
+						LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "Port is empty, using default port from config");
+					}
+					else {
+						// Invalid port
+						LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Invalid Server Port, please check the input field");
+						__MenuManager.SetLoadingScreen(false, Steamworks.RoomEnter.Error, "Invalid Server Port, please check the input field");
+						
+						PublicServerJoinData.ClearPort();
+						SyncUIWithPublicJoinData();
+						return;
+					}
 				}
 
 				// Check if CustomUsernamePatch is enabled
