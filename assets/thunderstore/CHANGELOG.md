@@ -7,6 +7,10 @@ Dates are in the format of `YYYY-MM-DD` (Year-Month-Day).
 
 ----
 
+## [1.1.1] - 2024-03-26
+- Fix invalid port error when the server port input on join window is empty instead of defaulting to config value
+- Added username input field for changing host username in-game on the host configuration window
+
 ## [1.1.0] - 2024-02-21
 - IPv6 hosting and join support
 - AAAA DNS Record support for IPv6, SRV support for IPv4 and IPv6 (Adjustable Priority in config)
