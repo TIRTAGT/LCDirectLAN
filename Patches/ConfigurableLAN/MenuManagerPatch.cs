@@ -173,6 +173,11 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			else {
 				ReuseDirectJoinButton();
 			}
+
+			// Check if we should create HostUsernameInputField
+			if (LCDirectLan.GetConfig<bool>("Custom Username", "Enabled") && LCDirectLan.GetConfig<bool>("Custom Username", "CreateHostUsernameInput")) {
+				CreateHostUsernameInputField();
+			}
 		}
 
 		/// <summary>
@@ -181,20 +186,9 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		private static void CreateDirectJoinButton()
 		{
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Creating a new LAN Join button !");
-			GameObject _MainButtons = GameObject.Find("Canvas/MenuContainer/MainButtons");
 
-			if (_MainButtons == null) {
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find MainButtons !");
-				return;
-			}
-
-			GameObject _HostButton = GameObject.Find("Canvas/MenuContainer/MainButtons/HostButton");
-
-			if (_HostButton == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find HostButton !");
-				return;
-			}
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons", out GameObject _MainButtons)) { return; }
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/HostButton", out GameObject _HostButton)) { return; }
 
 			// Re adjusts position of all menu buttons (using the old position for host button as the place of our new button)
 			Vector3 HostButtonNewPos = new Vector3(_HostButton.transform.position.x,  _HostButton.transform.position.y - 3.5F,  _HostButton.transform.position.z);
@@ -225,13 +219,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		private static void ReuseDirectJoinButton()
 		{
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Reusing the original LAN Join button !");
-			DirectJoinObj = GameObject.Find("Canvas/MenuContainer/MainButtons/StartLAN");
-
-			if (DirectJoinObj == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find StartLAN !");
-				return;
-			}
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/StartLAN", out GameObject DirectJoinObj)) { return; }
 
 			Button DirectJoinButton = DirectJoinObj.GetComponent<Button>();
 			
@@ -252,21 +240,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		/// </summary>
 		private static void CreateDirectConnectWindow()
 		{
-			GameObject _MenuContainer = GameObject.Find("Canvas/MenuContainer");
-
-			if (_MenuContainer == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find MenuContainer !");
-				return;
-			}
-
-			GameObject _LobbyHostSettings = GameObject.Find("Canvas/MenuContainer/LobbyHostSettings");
-
-			if (_LobbyHostSettings == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find LobbyHostSettings !");
-				return;
-			}
+			if (!EnsureGameObjectExist("Canvas/MenuContainer", out GameObject _MenuContainer)) { return; }
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings", out GameObject _LobbyHostSettings)) { return; }
 
 			// Create a duplicate of the HostButton and use the original position
 			DirectConnectWindow = GameObject.Instantiate(_LobbyHostSettings, _MenuContainer.transform);
@@ -296,6 +271,10 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 250);
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 270);
 			DCSettingsContainer.SetActive(true); // make sure it is not hidden by default
+
+			// Delete LCDirectLAN's HostUsernameLabel and HostUsernameField
+			GameObject.Destroy(DCSettingsContainer.transform.GetChild(7).gameObject);
+			GameObject.Destroy(DCSettingsContainer.transform.GetChild(6).gameObject);
 
 			// Delete PrivatePublicDescription
 			GameObject.Destroy(DCSettingsContainer.transform.GetChild(5).gameObject);
@@ -978,6 +957,90 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			GameObject a = GameObject.Find("Canvas/MenuContainer/LoadingScreen/LoadingTextContainer/LoadingText");
 			TextMeshProUGUI b = a.GetComponent<TextMeshProUGUI>();
 			b.text = text;
+		}
+
+		/// <summary>
+		/// Utility function to ensure a GameObject exists in the scene
+		/// </summary>
+		/// <param name="path">The path to the GameObject</param>
+		/// <param name="obj">The GameObject reference for use</param>
+		/// <returns>True if the GameObject exists, False otherwise</returns>
+		public static bool EnsureGameObjectExist(string path, out GameObject obj)
+		{
+			obj = GameObject.Find(path);
+
+			if (obj == null)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, $"Cannot find {path} !");
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Create the Host Username Input Field in the game's Host Settings menu
+		/// </summary>
+		public static void CreateHostUsernameInputField()
+		{
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer", out GameObject _HostSettingsContainer)) { return; }
+
+			_HostSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 205);
+
+			// Move LobbyHostOptions up by 3
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions", out GameObject _LobbyHostOptions)) { return; }
+			Vector3 tmp = _LobbyHostOptions.transform.position;
+			_LobbyHostOptions.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + 3, tmp.z), _LobbyHostOptions.transform.rotation);
+
+			// Move Confirm and Back down by 4
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Confirm", out GameObject _ConfirmButton)) { return; }
+			tmp = _ConfirmButton.transform.position;
+			_ConfirmButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y - 4, tmp.z), _ConfirmButton.transform.rotation);
+
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Back", out GameObject _BackButton)) { return; }
+			tmp = _BackButton.transform.position;
+			_BackButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y - 4, tmp.z), _BackButton.transform.rotation);
+
+			// Create the UsernameInputLabel
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/Header", out GameObject _LANOptionsHeader)) { return; }
+			GameObject HostUsernameLabel = GameObject.Instantiate(_LANOptionsHeader, _HostSettingsContainer.transform);
+			HostUsernameLabel.name = "HostUsernameLabel";
+			HostUsernameLabel.transform.SetLocalPositionAndRotation(new Vector3(-74, 2.5F, 0), HostUsernameLabel.transform.localRotation);
+
+			TextMeshProUGUI TMPRouGUI_HostUsernameLabel = HostUsernameLabel.GetComponent<TextMeshProUGUI>();
+			TMPRouGUI_HostUsernameLabel.text = "My Username: ";
+			TMPRouGUI_HostUsernameLabel.fontSize = 13;
+
+			// Create the UsernameInputField
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/ServerNameField", out GameObject _ServerNameField)) { return; }
+			GameObject HostUsernameField = GameObject.Instantiate(_ServerNameField, _HostSettingsContainer.transform);
+			HostUsernameField.name = "HostUsernameField";
+			HostUsernameField.transform.SetLocalPositionAndRotation(new Vector3(0, -27, 0), HostUsernameField.transform.localRotation);
+			HostUsernameField.SetActive(true);
+
+			TMP_InputField TMPRouGUI_HostUsernameField = HostUsernameField.GetComponent<TMP_InputField>();
+			((TextMeshProUGUI)TMPRouGUI_HostUsernameField.placeholder).text = LCDirectLan.GetConfig<string>("Custom Username", "HostDefaultUsername");
+		}
+
+		[HarmonyPatch("ConfirmHostButton")]
+		[HarmonyPrefix]
+		[HarmonyPriority(Priority.VeryLow)]
+		public static bool Prefix_ConfirmHostButton()
+		{
+			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/HostUsernameField", out GameObject _HostUsernameField)) { return false; }
+
+			string HostUsername = GetInputTextField(_HostUsernameField);
+
+			if (HostUsername.Length <= 0 || HostUsername.Length > UsernameLengthLimit)
+			{
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, $"Host Username must be between 1 to {UsernameLengthLimit} ASCII characters");
+				__MenuManager.SetLoadingScreen(false, Steamworks.RoomEnter.Error, "Host Username must be between 1 to 30 ASCII characters");
+				return false;
+			}
+
+			LCDirectLan.SetConfig("Custom Username", "HostDefaultUsername", HostUsername);
+			LCDirectLan.SaveConfig();
+			return true;
 		}
 	}
 }

@@ -100,6 +100,7 @@ namespace LCDirectLAN
 			/* Custom Username Feature / Patches */
 			config.Bind<bool>("Custom Username", "Enabled", false, new ConfigDescription("Enable CustomUsernamePatch ?\nThis patch requires both Server and Client(s) to work correctly, but having this enabled doesn't interfere with vanilla players (or players that didn't have this enabled)."));
 			config.Bind<string>("Custom Username", "HostDefaultUsername", "Lethal Hoster", new ConfigDescription("Default Username when Hosting a game"));
+			config.Bind<bool>("Custom Username", "CreateHostUsernameInput", true, new ConfigDescription("Create input field for Host Username in the game's host configuration window"));
 			config.Bind<string>("Custom Username", "JoinDefaultUsername", "Lethal Player", new ConfigDescription("Default Username when Joining a game\nChange-able in the game"));
 			config.Bind<bool>("Custom Username", "MergeDefaultUsername", false, new ConfigDescription("Copy/Merge/Use JoinDefaultUsername as HostDefaultUsername too"));
 			
