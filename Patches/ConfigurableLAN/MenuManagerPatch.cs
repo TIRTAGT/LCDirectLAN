@@ -985,21 +985,23 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		{
 			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer", out GameObject _HostSettingsContainer)) { return; }
 
+			Vector3 YOffsets = LCDirectLan.GetConfig<Vector3>("Custom Username", "HostUsernameInput_Offset_Y");
+
 			_HostSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 205);
 
 			// Move LobbyHostOptions up by 3
 			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions", out GameObject _LobbyHostOptions)) { return; }
 			Vector3 tmp = _LobbyHostOptions.transform.position;
-			_LobbyHostOptions.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + 3, tmp.z), _LobbyHostOptions.transform.rotation);
+			_LobbyHostOptions.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[0], tmp.z), _LobbyHostOptions.transform.rotation);
 
 			// Move Confirm and Back down by 4
 			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Confirm", out GameObject _ConfirmButton)) { return; }
 			tmp = _ConfirmButton.transform.position;
-			_ConfirmButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y - 4, tmp.z), _ConfirmButton.transform.rotation);
+			_ConfirmButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[1], tmp.z), _ConfirmButton.transform.rotation);
 
 			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Back", out GameObject _BackButton)) { return; }
 			tmp = _BackButton.transform.position;
-			_BackButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y - 4, tmp.z), _BackButton.transform.rotation);
+			_BackButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[2], tmp.z), _BackButton.transform.rotation);
 
 			// Create the UsernameInputLabel
 			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/Header", out GameObject _LANOptionsHeader)) { return; }
