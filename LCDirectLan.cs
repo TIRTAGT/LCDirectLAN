@@ -15,6 +15,7 @@ using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 namespace LCDirectLAN
 {
@@ -30,7 +31,7 @@ namespace LCDirectLAN
 		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
 		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
 		/// </summary>
-		public const string PLUGIN_VERSION  = "1.1.0";
+		public const string PLUGIN_VERSION  = "1.1.1";
 		
 		/// <summary>
 		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
@@ -100,8 +101,10 @@ namespace LCDirectLAN
 			/* Custom Username Feature / Patches */
 			config.Bind<bool>("Custom Username", "Enabled", false, new ConfigDescription("Enable CustomUsernamePatch ?\nThis patch requires both Server and Client(s) to work correctly, but having this enabled doesn't interfere with vanilla players (or players that didn't have this enabled)."));
 			config.Bind<string>("Custom Username", "HostDefaultUsername", "Lethal Hoster", new ConfigDescription("Default Username when Hosting a game"));
+			config.Bind<bool>("Custom Username", "CreateHostUsernameInput", true, new ConfigDescription("Create input field for Host Username in the game's host configuration window, this will move other elements on the UI and may not be compatible with other mods that also changes the host UI.\nAdjust the offsets if necessary\n\nRequires the MergeDefaultUsername to be disabled in order to work correctly"));
+			config.Bind<Vector3>("Custom Username", "HostUsernameInput_Offset_Y", new Vector3(3, -4, -4), new ConfigDescription("Y Offsets for multiple UI elements that were moved to make room for HostUsernameInput if it is enabled\n\nX value is the Header and the Remote/Local selection button\nY value is the confirm button\nZ value is the back button"));
 			config.Bind<string>("Custom Username", "JoinDefaultUsername", "Lethal Player", new ConfigDescription("Default Username when Joining a game\nChange-able in the game"));
-			config.Bind<bool>("Custom Username", "MergeDefaultUsername", false, new ConfigDescription("Copy/Merge/Use JoinDefaultUsername as HostDefaultUsername too"));
+			config.Bind<bool>("Custom Username", "MergeDefaultUsername", false, new ConfigDescription("Copy/Merge/Use JoinDefaultUsername as HostDefaultUsername too, breaks CreateHostUsernameInput functionality"));
 			
 			/* Game Join/Connect Timeout settings */
 			config.Bind<bool>("Unity Networking", "Enabled", false, new ConfigDescription("Enable UnityNetworkingPatch ?"));

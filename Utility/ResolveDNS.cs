@@ -256,6 +256,9 @@ namespace LCDirectLAN.Utility
 		{
 			// If it's localhost, return true
 			if (hostname == "localhost") { return true; }
+
+			// If it's an IP, then it's not a hostname
+			if (CheckIPType(hostname) != AddressFamily.Unknown) { return false; }
 			
 			return ResolveDNS.HostnameRuleMatch.IsMatch(hostname);
 		}

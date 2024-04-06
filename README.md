@@ -27,19 +27,19 @@ Checkout the project [Wiki page](../../wiki) for more detailed information such 
 ----
 
 ### Features (Fixes and Enhancements to LAN Lobbies)
-- Modify Lobby Hosting Port, allowing multiple lobbies to be hosted in the same IP Address.
+- Modify Lobby Hosting Port, allowing multiple lobbies to be hosted in the same IP Address
 
-- Manual IP and Port input for joining lobby.
+- Manual IP and Port input for joining lobby
 
 - Supports automatic join configuration via DNS (SRV, TXT, AAAA, A)
 
-- Custom Username support, not related to the Steam Username.
+- Custom Username support, not related to the Steam Username
 
-- In-Game Latency display, (RTT/One-Way Measurement):
+- In-Game Latency display, (RTT/One-Way Measurement)
 
 - Slow Server Detection
 
-- Modify the game default join connect timeout value to a custom value.
+- Modify the game default join connect timeout value to a custom value
 
 Screenshots, and more detailed information about the features are available on the [Wiki/Features](../../wiki/Features) page.
 

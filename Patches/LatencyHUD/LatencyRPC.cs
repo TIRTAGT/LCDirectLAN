@@ -101,6 +101,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			StopTrackingLatency(__instance);
 			UnityTransportObject = null;
 
+			if (__instance.NetworkManager == null || !__instance.NetworkManager.IsListening) { return; }
 			if (NetworkManager.Singleton == null) { return; }
 
 			// Unregister message handlers
