@@ -175,7 +175,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 
 			// Check if we should create HostUsernameInputField
-			if (LCDirectLan.GetConfig<bool>("Custom Username", "Enabled") && LCDirectLan.GetConfig<bool>("Custom Username", "CreateHostUsernameInput")) {
+			if (LCDirectLan.GetConfig<bool>("Custom Username", "Enabled") && LCDirectLan.GetConfig<bool>("Custom Username", "CreateHostUsernameInput") && !LCDirectLan.GetConfig<bool>("Custom Username", "MergeDefaultUsername")) {
 				CreateHostUsernameInputField();
 			}
 		}
