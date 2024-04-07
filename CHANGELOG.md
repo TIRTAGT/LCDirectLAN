@@ -6,6 +6,9 @@ The change logs are organized in reverse chronological order, with the latest re
 Dates are in the format of `YYYY-MM-DD` (Year-Month-Day).
 
 ----
+## [1.1.2] - 2024-04-07
+- Fix prevents hosting and join dialog crashes if CreateHostUsernameInput is disabled or unavailable
+- Added maintainers guide, I forgot what to do when trying to release a new version XD
 
 ## [1.1.1] - 2024-04-06
 - Fix invalid port error when the server port input on join window is empty instead of defaulting to config value
