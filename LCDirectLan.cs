@@ -31,7 +31,7 @@ namespace LCDirectLAN
 		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
 		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
 		/// </summary>
-		public const string PLUGIN_VERSION  = "1.1.2";
+		public const string PLUGIN_VERSION  = "1.1.3";
 		
 		/// <summary>
 		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
