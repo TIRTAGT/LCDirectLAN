@@ -1,7 +1,7 @@
 {
 	"name": "LCDirectLAN",
 	"description": "Mod that fixes and enhances LAN lobbies without interfering with the Steam-networked lobbies, built around BepInEx.",
-	"version_number": "1.1.1",
+	"version_number": "1.1.2",
 	"dependencies": [
 		"BepInEx-BepInExPack-5.4.2100"
 	],

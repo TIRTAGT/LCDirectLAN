@@ -11,3 +11,5 @@ It contains the following files/folders:
 - `repository/source`: Contains source files for the assets used on the GitHub Repository.
 
 - `repository/wiki`: Contains assets used on the GitHub wiki.
+
+- `repository/guide`: Contains guides that are not part of the wiki but are used on the GitHub Repository.

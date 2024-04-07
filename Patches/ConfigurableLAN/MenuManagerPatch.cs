@@ -187,8 +187,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		{
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Creating a new LAN Join button !");
 
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons", out GameObject _MainButtons)) { return; }
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/HostButton", out GameObject _HostButton)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/MainButtons", out GameObject _MainButtons)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/HostButton", out GameObject _HostButton)) { return; }
 
 			// Re adjusts position of all menu buttons (using the old position for host button as the place of our new button)
 			Vector3 HostButtonNewPos = new Vector3(_HostButton.transform.position.x,  _HostButton.transform.position.y - 3.5F,  _HostButton.transform.position.z);
@@ -219,7 +219,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		private static void ReuseDirectJoinButton()
 		{
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Reusing the original LAN Join button !");
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/StartLAN", out GameObject DirectJoinObj)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/MainButtons/StartLAN", out GameObject DirectJoinObj)) { return; }
 
 			Button DirectJoinButton = DirectJoinObj.GetComponent<Button>();
 			
@@ -240,8 +240,8 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		/// </summary>
 		private static void CreateDirectConnectWindow()
 		{
-			if (!EnsureGameObjectExist("Canvas/MenuContainer", out GameObject _MenuContainer)) { return; }
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings", out GameObject _LobbyHostSettings)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer", out GameObject _MenuContainer)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings", out GameObject _LobbyHostSettings)) { return; }
 
 			// Create a duplicate of the HostButton and use the original position
 			DirectConnectWindow = GameObject.Instantiate(_LobbyHostSettings, _MenuContainer.transform);
@@ -272,35 +272,46 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 270);
 			DCSettingsContainer.SetActive(true); // make sure it is not hidden by default
 
-			// Delete LCDirectLAN's HostUsernameLabel and HostUsernameField
-			GameObject.Destroy(DCSettingsContainer.transform.GetChild(7).gameObject);
-			GameObject.Destroy(DCSettingsContainer.transform.GetChild(6).gameObject);
-
-			// Delete PrivatePublicDescription
-			GameObject.Destroy(DCSettingsContainer.transform.GetChild(5).gameObject);
-
-			// Delete tipText (it's empty anyway....)
-			GameObject.Destroy(DCSettingsContainer.transform.GetChild(2).gameObject);
-
-			GameObject LobbyHostOptions = DCSettingsContainer.transform.GetChild(1).gameObject;
-
-			if (LobbyHostOptions == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Cannot find LobbyHostOptions !");
-				return;
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/HostUsernameLabel")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/HostUsernameLabel");
 			}
 
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/HostUsernameField")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/HostUsernameField");
+			}
+
+			// Delete PrivatePublicDescription
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/PrivatePublicDescription")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/PrivatePublicDescription");
+			}
+
+			// Delete tipText (it's empty anyway....)
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/tipText")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/tipText");
+			}
+
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions", out GameObject LobbyHostOptions)) { return; }
+
 			// Delete LANOptions (it's for hosting a server)
-			GameObject.Destroy(LobbyHostOptions.transform.GetChild(1).gameObject);
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/LANOptions")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/LANOptions");
+			}
 
 			GameObject OptionsNormal = LobbyHostOptions.transform.GetChild(0).gameObject;
 
 			// Delete the Public and Private selection
-			GameObject.Destroy(OptionsNormal.transform.GetChild(3).gameObject);
-			GameObject.Destroy(OptionsNormal.transform.GetChild(4).gameObject);
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/Public")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/Public");
+			}
+
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/Private")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/Private");
+			}
 
 			// Delete ServerTagInputField
-			GameObject.Destroy(OptionsNormal.transform.GetChild(2).gameObject);
+			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/ServerTagInputField")) {
+				GameObjectManager.DeleteGameObject("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/LobbyHostOptions/OptionsNormal/ServerTagInputField");
+			}
 			#endregion
 
 			// Change parent of the EnterAName label and ServerNameField
@@ -741,9 +752,9 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		/// </summary>
 		private static void SyncUIWithPublicJoinData()
 		{
-			GameObject ServerNameField = GameObject.Find("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/ServerNameField");
-			GameObject ServerPortField = GameObject.Find("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/ServerPortField");
-			GameObject UsernameField = GameObject.Find("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/CustomUsernameField");
+			GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/ServerNameField", out GameObject ServerNameField);
+			GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/ServerPortField", out GameObject ServerPortField);
+			GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/CustomUsernameField", out GameObject UsernameField);
 
 			IsSyncingUIWithData = true;
 			SetInputTextField(ServerNameField, PublicServerJoinData.Address);
@@ -960,51 +971,32 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		}
 
 		/// <summary>
-		/// Utility function to ensure a GameObject exists in the scene
-		/// </summary>
-		/// <param name="path">The path to the GameObject</param>
-		/// <param name="obj">The GameObject reference for use</param>
-		/// <returns>True if the GameObject exists, False otherwise</returns>
-		public static bool EnsureGameObjectExist(string path, out GameObject obj)
-		{
-			obj = GameObject.Find(path);
-
-			if (obj == null)
-			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, $"Cannot find {path} !");
-				return false;
-			}
-
-			return true;
-		}
-
-		/// <summary>
 		/// Create the Host Username Input Field in the game's Host Settings menu
 		/// </summary>
 		public static void CreateHostUsernameInputField()
 		{
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer", out GameObject _HostSettingsContainer)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer", out GameObject _HostSettingsContainer)) { return; }
 
 			Vector3 YOffsets = LCDirectLan.GetConfig<Vector3>("Custom Username", "HostUsernameInput_Offset_Y");
 
 			_HostSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 205);
 
 			// Move LobbyHostOptions up by 3
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions", out GameObject _LobbyHostOptions)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions", out GameObject _LobbyHostOptions)) { return; }
 			Vector3 tmp = _LobbyHostOptions.transform.position;
 			_LobbyHostOptions.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[0], tmp.z), _LobbyHostOptions.transform.rotation);
 
 			// Move Confirm and Back down by 4
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Confirm", out GameObject _ConfirmButton)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Confirm", out GameObject _ConfirmButton)) { return; }
 			tmp = _ConfirmButton.transform.position;
 			_ConfirmButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[1], tmp.z), _ConfirmButton.transform.rotation);
 
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Back", out GameObject _BackButton)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/Back", out GameObject _BackButton)) { return; }
 			tmp = _BackButton.transform.position;
 			_BackButton.transform.SetPositionAndRotation(new Vector3(tmp.x, tmp.y + YOffsets[2], tmp.z), _BackButton.transform.rotation);
 
 			// Create the UsernameInputLabel
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/Header", out GameObject _LANOptionsHeader)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/Header", out GameObject _LANOptionsHeader)) { return; }
 			GameObject HostUsernameLabel = GameObject.Instantiate(_LANOptionsHeader, _HostSettingsContainer.transform);
 			HostUsernameLabel.name = "HostUsernameLabel";
 			HostUsernameLabel.transform.SetLocalPositionAndRotation(new Vector3(-74, 2.5F, 0), HostUsernameLabel.transform.localRotation);
@@ -1014,7 +1006,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			TMPRouGUI_HostUsernameLabel.fontSize = 13;
 
 			// Create the UsernameInputField
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/ServerNameField", out GameObject _ServerNameField)) { return; }
+			if (!GameObjectManager.EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/LobbyHostOptions/LANOptions/ServerNameField", out GameObject _ServerNameField)) { return; }
 			GameObject HostUsernameField = GameObject.Instantiate(_ServerNameField, _HostSettingsContainer.transform);
 			HostUsernameField.name = "HostUsernameField";
 			HostUsernameField.transform.SetLocalPositionAndRotation(new Vector3(0, -27, 0), HostUsernameField.transform.localRotation);
@@ -1029,9 +1021,15 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		[HarmonyPriority(Priority.VeryLow)]
 		public static bool Prefix_ConfirmHostButton()
 		{
-			if (!EnsureGameObjectExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/HostUsernameField", out GameObject _HostUsernameField)) { return false; }
+			// Only run this if CustomUsernamePatch is enabled and the HostUsernameField exists
+			if (!GameObjectManager.IsExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/HostUsernameField", out GameObject _HostUsernameField)) { return false; }
 
 			string HostUsername = GetInputTextField(_HostUsernameField);
+
+			string OriginalHostUsername = LCDirectLan.GetConfig<string>("Custom Username", "HostDefaultUsername");
+
+			// If the username is the same as the original, don't modify at all
+			if (HostUsername == OriginalHostUsername) { return true; }
 
 			if (HostUsername.Length <= 0 || HostUsername.Length > UsernameLengthLimit)
 			{
