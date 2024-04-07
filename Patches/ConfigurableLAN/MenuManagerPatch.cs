@@ -1022,7 +1022,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		public static bool Prefix_ConfirmHostButton()
 		{
 			// Only run this if CustomUsernamePatch is enabled and the HostUsernameField exists
-			if (!GameObjectManager.IsExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/HostUsernameField", out GameObject _HostUsernameField)) { return false; }
+			if (!GameObjectManager.IsExist("Canvas/MenuContainer/LobbyHostSettings/HostSettingsContainer/HostUsernameField", out GameObject _HostUsernameField)) { return true; }
 
 			string HostUsername = GetInputTextField(_HostUsernameField);
 
