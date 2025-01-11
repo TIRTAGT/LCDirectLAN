@@ -11,15 +11,19 @@
 *	Copyright (c) 2024 Matthew Tirtawidjaja <matthew@tirtagt.xyz>
 **/
 
+using System;
 using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using LobbyCompatibility.Features;
 using UnityEngine;
 
 namespace LCDirectLAN
 {
 	[BepInPlugin(LCDirectLan.PLUGIN_GUID, LCDirectLan.PLUGIN_NAME, LCDirectLan.PLUGIN_VERSION)]
+	[BepInDependency("BMX.LobbyCompatibility", BepInDependency.DependencyFlags.SoftDependency)]
 	public class LCDirectLan : BaseUnityPlugin
 	{
 		public const string PLUGIN_GUID = "TIRTAGT.LCDirectLAN";
@@ -31,7 +35,7 @@ namespace LCDirectLAN
 		/// <b>Minor</b> - Minor version number, incremented when there are changes that breaks compatibility<br/>
 		/// <b>Build</b> - Build number, incremented when there are changes that doesn't break any compatibility<br/>
 		/// </summary>
-		public const string PLUGIN_VERSION  = "1.1.3";
+		public const string PLUGIN_VERSION = "1.1.4";
 		
 		/// <summary>
 		/// Version of the plugin assembly that follows "major.minor.build.revision" format<br/>
@@ -42,10 +46,10 @@ namespace LCDirectLAN
 		/// <b>Revision</b> - Revision number, 00000 (for Debug/Development) or 10101 (for Release)<br/>
 		/// </summary>
 #if DEBUG
-		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".00000";
+		public const string PLUGIN_ASSEMBLY_VERSION = PLUGIN_VERSION + ".00000";
 		public const string PLUGIN_COMPILE_CONFIG = "Debug";
 #else
-		public const string PLUGIN_ASSEMBLY_VERSION  = PLUGIN_VERSION + ".10101";
+		public const string PLUGIN_ASSEMBLY_VERSION = PLUGIN_VERSION + ".10101";
 		public const string PLUGIN_COMPILE_CONFIG = "Release";
 #endif
 
@@ -135,6 +139,7 @@ namespace LCDirectLAN
 		private void InjectPatches() {
 			// Do not inject any further patches if we are not in LAN mode
 			if (!LCDirectLan.IsOnLanMode) {
+				Report_BMX_LobbyCompatibility(true);
 				this.Logger.LogError($"{LCDirectLan.PLUGIN_NAME} should not be injected when game is started on Online (steam) mode");
 				return;
 			}
@@ -160,6 +165,9 @@ namespace LCDirectLAN
 				HarmonyLib.PatchAll(typeof(Patches.LatencyHUD.HUDManagerPatch));
 				HarmonyLib.PatchAll(typeof(Patches.LatencyHUD.LatencyRPC));
 			}
+
+			// So far, LCDirectLAN are fully compatible with vanilla lobbies
+			Report_BMX_LobbyCompatibility(true);
 
 			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} patches are injected");
 		}
@@ -249,6 +257,26 @@ namespace LCDirectLAN
 			if (config == null) { return; }
 
 			config.Save();
+		}
+
+		/// <summary>
+		/// Report compability to BMX.LobbyCompatibility plugin
+		/// </summary>
+		/// <param name="VanillaSafe">Is LCDirectLAN with the current configuration are compatible with vanilla lobbies ?</param>
+		protected static void Report_BMX_LobbyCompatibility(bool VanillaSafe = false) {
+			if (!Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility")) {
+				LCDirectLan.Log(LogLevel.Warning, "BMX.LobbyCompatibility is not loaded, skipping compability report");
+				return;
+			}
+
+			PluginHelper.RegisterPlugin(
+				LCDirectLan.PLUGIN_GUID,
+				new Version(LCDirectLan.PLUGIN_VERSION),
+				(VanillaSafe) ? LobbyCompatibility.Enums.CompatibilityLevel.ClientOnly : LobbyCompatibility.Enums.CompatibilityLevel.Everyone,
+				LobbyCompatibility.Enums.VersionStrictness.Minor
+			);
+
+			LCDirectLan.Log(LogLevel.Info, $"Reported compability as {(VanillaSafe ? "ClientOnly" : "Everyone")} to BMX.LobbyCompatibility");
 		}
 	}
 }

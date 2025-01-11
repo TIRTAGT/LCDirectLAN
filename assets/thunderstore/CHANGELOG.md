@@ -6,6 +6,10 @@ The change logs are organized in reverse chronological order, with the latest re
 Dates are in the format of `YYYY-MM-DD` (Year-Month-Day).
 
 ----
+## [1.1.4] - 2025-01-12
+- Add BMX.LobbyCompatibility as a soft dependency
+- Dynamically reports LCDirectLAN configuration compatibility to BMX.LobbyCompatibility
+
 ## [1.1.3] - 2024-04-07
 - Fix unable to host when HostUsernameInput is false or unavailable
 
