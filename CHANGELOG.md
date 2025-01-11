@@ -9,6 +9,7 @@ Dates are in the format of `YYYY-MM-DD` (Year-Month-Day).
 ## [1.1.4] - 2025-01-12
 - Add BMX.LobbyCompatibility as a soft dependency
 - Dynamically reports LCDirectLAN configuration compatibility to BMX.LobbyCompatibility
+- Fix infinite waiting when resolving DNS hostnames
 
 ## [1.1.3] - 2024-04-07
 - Fix unable to host when HostUsernameInput is false or unavailable

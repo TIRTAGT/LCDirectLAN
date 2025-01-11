@@ -20,8 +20,22 @@ using DnsClient.Protocol;
 
 namespace LCDirectLAN.Utility
 {
-    internal class ResolveDNS
-    {
+	internal class ResolveDNS
+	{
+		private static readonly LookupClientOptions options = new LookupClientOptions();
+		private static LookupClient client;
+
+		public static void Initialize()
+		{
+			options.Timeout = TimeSpan.FromSeconds(5);
+			options.Retries = 2;
+			options.UseCache = true;
+			options.UseRandomNameServer = true;
+			options.ThrowDnsErrors = false;
+
+			client = new LookupClient(options);
+		}
+
 		private static readonly Regex HostnameRuleMatch = new Regex("^(((([a-z0-9])|([a-z0-9](-|_)[a-z]))+\\.)+(([a-z0-9])|([a-z0-9](-|_)[a-z0-9]))+)$");
 
 		/// <summary>
@@ -29,17 +43,19 @@ namespace LCDirectLAN.Utility
 		/// </summary>
 		/// <param name="record_name">The A record name to resolve</param>
 		/// <returns>The IPv4 address as string, or empty string on failure</returns>
-        public static string ResolveARecord(string record_name)
-        {
+		public static string ResolveARecord(string record_name)
+		{
 			string result = string.Empty;
-
-			LookupClient a = new LookupClient();
 			IDnsQueryResponse b = null;
 
-			try {
-				b = a.Query(record_name, QueryType.A, QueryClass.IN);
+			// Initialize the DNS library if it hasn't been initialized yet
+			if (client == null) { Initialize(); }
+
+			try
+			{
+				b = client.Query(record_name, QueryType.A, QueryClass.IN);
 			}
-			catch(SocketException e)
+			catch (Exception e)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve A Record: " + e.Message);
 			}
@@ -65,18 +81,19 @@ namespace LCDirectLAN.Utility
 		/// </summary>
 		/// <param name="record_name">The AAAA record name to resolve</param>
 		/// <returns>The IPv6 address as string, or empty string on failure</returns>
-        public static string ResolveAAAARecord(string record_name)
-        {
+		public static string ResolveAAAARecord(string record_name)
+		{
 			string result = string.Empty;
-
-			LookupClient a = new LookupClient();
 			IDnsQueryResponse b = null;
+
+			// Initialize the DNS library if it hasn't been initialized yet
+			if (client == null) { Initialize(); }
 
 			try
 			{
-				b = a.Query(record_name, QueryType.AAAA, QueryClass.IN);
+				b = client.Query(record_name, QueryType.AAAA, QueryClass.IN);
 			}
-			catch (SocketException e)
+			catch (Exception e)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve AAAA Record: " + e.Message);
 			}
@@ -102,41 +119,42 @@ namespace LCDirectLAN.Utility
 		/// </summary>
 		/// <param name="record_name">The TXT record name to resolve</param>
 		/// <returns>The first TXT data returned or empty when there is no data</returns>
-        public static string ResolveTXTRecord(string record_name)
-        {
-            string result = string.Empty;
+		public static string ResolveTXTRecord(string record_name)
+		{
+			string result = string.Empty;
+			IDnsQueryResponse b = null;
 
-            LookupClient a = new LookupClient();
-            IDnsQueryResponse b = null;
+			// Initialize the DNS library if it hasn't been initialized yet
+			if (client == null) { Initialize(); }
 
 			try
 			{
-				b = a.Query(record_name, QueryType.TXT, QueryClass.IN);
+				b = client.Query(record_name, QueryType.TXT, QueryClass.IN);
 			}
-			catch (SocketException e)
+			catch (Exception e)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve TXT Record: " + e.Message);
 			}
-            
+
 			if (b == null) { return result; }
-            if (b.HasError) { return result; }
+			if (b.HasError) { return result; }
 
-            for (int i = 0; i < b.Answers.Count; i++)
-            {
-                if (b.Answers[i] == null || !(b.Answers[i] is TxtRecord)) {  continue; }
+			for (int i = 0; i < b.Answers.Count; i++)
+			{
+				if (b.Answers[i] == null || !(b.Answers[i] is TxtRecord)) { continue; }
 
-				TxtRecord c = (TxtRecord) b.Answers[i];
+				TxtRecord c = (TxtRecord)b.Answers[i];
 
-                foreach (string d in c.EscapedText)
-                {
+				foreach (string d in c.EscapedText)
+				{
 					result = d;
 					break;
-                }
-                break;
-            }
+				}
+				break;
+			}
 
-            return result;
-        }
+			return result;
+		}
 
 		/// <summary>
 		/// Resolve a SRV Record
@@ -146,15 +164,16 @@ namespace LCDirectLAN.Utility
 		public static (string, UInt16) ResolveSRVRecord(string record_name)
 		{
 			(string, UInt16) result = (string.Empty, 0);
-
-			LookupClient a = new LookupClient();
 			IDnsQueryResponse b = null;
+
+			// Initialize the DNS library if it hasn't been initialized yet
+			if (client == null) { Initialize(); }
 
 			try
 			{
-				b = a.Query(record_name, QueryType.SRV, QueryClass.IN);
+				b = client.Query(record_name, QueryType.SRV, QueryClass.IN);
 			}
-			catch (SocketException e)
+			catch (Exception e)
 			{
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Error, "Failed to resolve SRV Record: " + e.Message);
 				return result;
@@ -170,7 +189,8 @@ namespace LCDirectLAN.Utility
 				SrvRecord c = (SrvRecord)b.Answers[i];
 
 				// Check if we should prioritize IPv6 lookup for the SRV Host
-				if (LCDirectLan.GetConfig<bool>("Join", "SRVHost_PreferIPv6")) {
+				if (LCDirectLan.GetConfig<bool>("Join", "SRVHost_PreferIPv6"))
+				{
 					// Try get host address via AAAA Record first
 					result.Item1 = ResolveAAAARecord(c.Target.Value);
 
@@ -180,7 +200,8 @@ namespace LCDirectLAN.Utility
 						result.Item1 = ResolveARecord(c.Target.Value);
 						LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using A Record");
 					}
-					else {
+					else
+					{
 						LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using AAAA Record");
 					}
 
@@ -197,7 +218,8 @@ namespace LCDirectLAN.Utility
 					result.Item1 = ResolveAAAARecord(c.Target.Value);
 					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using AAAA Record");
 				}
-				else {
+				else
+				{
 					LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, "SRV Host is looked up using A Record");
 				}
 
@@ -214,14 +236,14 @@ namespace LCDirectLAN.Utility
 		/// <param name="ip">The string to be checked</param>
 		/// <returns>Boolean representing whether the string is a valid IPv4</returns>
 		public static bool IsValidIPv4(string ip)
-        {
-            if (IPAddress.TryParse(ip, out IPAddress a))
+		{
+			if (IPAddress.TryParse(ip, out IPAddress a))
 			{
 				return a.AddressFamily == AddressFamily.InterNetwork;
 			}
 
 			return false;
-        }
+		}
 
 		/// <summary>
 		/// Check if a string is a valid IPv6 Address
@@ -259,8 +281,8 @@ namespace LCDirectLAN.Utility
 
 			// If it's an IP, then it's not a hostname
 			if (CheckIPType(hostname) != AddressFamily.Unknown) { return false; }
-			
+
 			return ResolveDNS.HostnameRuleMatch.IsMatch(hostname);
 		}
-    }
+	}
 }

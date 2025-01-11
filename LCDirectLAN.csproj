@@ -30,7 +30,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DnsClient" Version="1.7.0" PrivateAssets="all" />
+    <PackageReference Include="DnsClient" Version="1.8.0" PrivateAssets="all" />
     <PackageReference Include="TeamBMX.LobbyCompatibility" Version="1.3.0" PrivateAssets="all" />
   </ItemGroup>
 
@@ -68,8 +68,8 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.7.0\lib\netstandard2.1\DnsClient.dll" DestinationFiles="$(TargetDir)libs\DnsClient.1.7.0\DnsClient.dll" />
-	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.7.0\README.md" DestinationFiles="$(TargetDir)libs\DnsClient.1.7.0\README.md" />
+	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.8.0\lib\netstandard2.1\DnsClient.dll" DestinationFiles="$(TargetDir)libs\DnsClient.1.8.0\DnsClient.dll" />
+	<Copy SourceFiles="$(ProjectDir)packages\dnsclient\1.8.0\README.md" DestinationFiles="$(TargetDir)libs\DnsClient.1.8.0\README.md" />
 	
 	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\LICENSE.TXT" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\LICENSE" />
 	<Copy SourceFiles="$(ProjectDir)packages\system.buffers\4.5.1\THIRD-PARTY-NOTICES.TXT" DestinationFiles="$(TargetDir)libs\System.Buffers.4.5.1\THIRD-PARTY-NOTICES" />
