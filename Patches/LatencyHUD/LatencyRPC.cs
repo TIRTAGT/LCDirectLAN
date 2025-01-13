@@ -78,7 +78,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, $"Listening _ServerLatencyRequestCallback_ToServerRpc()");
 
 			// Check if we shouldn't track latency to ourself
-			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideHUDWhileHosting") && NetworkManager.Singleton.IsServer) {
+			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideWhileHosting") && NetworkManager.Singleton.IsServer) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Not tracking latency as a server !");
 				return;
 			}
@@ -191,6 +191,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 					if (SecondsSinceIsWaitingPing < TargetPollingInterval) {
 						// Sleep until the next polling interval
 						yield return new WaitForSeconds(TargetPollingInterval - SecondsSinceIsWaitingPing);
+						SecondsSinceIsWaitingPing = TargetPollingInterval;
 					}
 
 					// Continue to the next polling interval
@@ -219,7 +220,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 					}
 
 					LCDirectLan.Log(BepInEx.Logging.LogLevel.Warning, "Server have not responded to our last ping request !");
-					HUDManagerPatch.UpdateLatencyHUD((ushort)(SecondsSinceIsWaitingPing * 1000));
+					HUDManagerPatch.UpdateLatencyHUD((ushort)(SecondsSinceIsWaitingPing * 1000), null);
 					
 					if (!HasSentHUDWarning) {
 						// Send a warning to the HUD
@@ -264,7 +265,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			}
 
 			// Update the HUD
-			HUDManagerPatch.UpdateLatencyHUD((ushort)latency);
+			HUDManagerPatch.UpdateLatencyHUD((ushort)latency, false);
 
 			return true;
 		}
@@ -370,7 +371,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			}
 
 			// Update the HUD
-			HUDManagerPatch.UpdateLatencyHUD(latency);
+			HUDManagerPatch.UpdateLatencyHUD(latency, true);
 
 			IsWaitingPingCallback = false;
 		}

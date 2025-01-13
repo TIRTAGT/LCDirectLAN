@@ -24,6 +24,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 		private static GameObject LatencyHUD = null;
 		private static TextMeshProUGUI LatencyHUD_TMP = null;
 		private static ulong LatencyValue = 0;
+		private static bool LatencyValueIsAccurate = false;
 		private static bool UpdateLock = false;
 
 		[HarmonyPatch("Awake")]
@@ -54,7 +55,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			}
 
 			// Check if we shouldn't track latency to ourself
-			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideHUDWhileHosting") && NetworkManager.Singleton.IsServer) {
+			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideWhileHosting") && NetworkManager.Singleton.IsServer) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Latency HUD is disabled while hosting !");
 				return;
 			}
@@ -82,7 +83,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			float OffsetLocation_Y = LCDirectLan.GetConfig<float>("Latency HUD", "Offset_Y");
 
 			LatencyHUD.name = "LCDirectLAN_LatencyHUD";
-			LatencyHUD.transform.SetLocalPositionAndRotation(new Vector3(-380 + OffsetLocation_X, 229 + OffsetLocation_Y, 0), LatencyHUD.transform.rotation);
+			LatencyHUD.transform.SetLocalPositionAndRotation(new Vector3(-360 + OffsetLocation_X, 240 + OffsetLocation_Y, 0), LatencyHUD.transform.rotation);
 
 			// Get the TextMeshPro component
 			LatencyHUD_TMP = LatencyHUD.GetComponent<TextMeshProUGUI>();
@@ -96,8 +97,9 @@ namespace LCDirectLAN.Patches.LatencyHUD
 				LatencyHUD_TMP.fontSize = LatencyHUD_TMP.fontSizeMin;
 			}
 
-			LatencyHUD_TMP.text = "Ping : [Calculating] ms";
-			LatencyHUD_TMP.maxVisibleCharacters = 23;
+			LatencyHUD_TMP.text = "... ms";
+			LatencyHUD_TMP.maxVisibleCharacters = 25;
+			LatencyHUD_TMP.verticalAlignment = VerticalAlignmentOptions.Middle;
 		}
 
 		[HarmonyPatch("Update")]
@@ -128,18 +130,28 @@ namespace LCDirectLAN.Patches.LatencyHUD
 				LatencyHUD_TMP.color = new Color(0, 1, 0, 1);
 			}
 
-			LatencyHUD_TMP.text = $"Ping : {LatencyValue} ms";
+			if (LatencyValueIsAccurate)
+			{
+				LatencyHUD_TMP.text = $"{LatencyValue} ms";
+			}
+			else
+			{
+				LatencyHUD_TMP.text = $"<i>{LatencyValue} ms</i>";
+			}
 		}
 
 		/// <summary>
 		/// Update the latency HUD value, the actual UI update will be done in the Update() method
 		/// </summary>
 		/// <param name="latency">The latency value in ms</param>
-		public static void UpdateLatencyHUD(ushort latency)
+		public static void UpdateLatencyHUD(ushort latency, bool? AccurateLatencyRPC)
 		{
 			if (LatencyHUD_TMP == null) { return; }
 
 			LatencyValue = latency;
+			if (AccurateLatencyRPC != null) {
+				LatencyValueIsAccurate = (bool)AccurateLatencyRPC;
+			}
 			UpdateLock = false;
 		}
 

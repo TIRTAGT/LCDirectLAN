@@ -34,7 +34,7 @@ namespace LCDirectLAN.Patches
 
 			if (!LCDirectLan.IsOnLanMode)
 			{
-				LCDirectLan.Log(BepInEx.Logging.LogLevel.Warning, $"{LCDirectLan.PLUGIN_NAME} is disabled when game is started on Online (steam) mode");
+				LCDirectLan.Log(BepInEx.Logging.LogLevel.Info, $"{LCDirectLan.PLUGIN_NAME} is disabled when game is started on Online (steam) mode");
 				return;
 			}
 
