@@ -269,7 +269,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			}
 			DCSettingsContainer.name = "DCSettingsContainer";
 			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 250);
-			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 270);
+			DCSettingsContainer.GetComponent<RectTransform>().SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 280);
 			DCSettingsContainer.SetActive(true); // make sure it is not hidden by default
 
 			if (GameObjectManager.IsExist("Canvas/MenuContainer/DirectConnectWindow/DCSettingsContainer/HostUsernameLabel")) {
@@ -325,17 +325,17 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			// Duplicate the text for port
 			GameObject AddressInputLabel = DCSettingsContainer.transform.Find("EnterAName").gameObject;
 			AddressInputLabel.name = "AddressInputLabel";
-			AddressInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-35, 131, 0), AddressInputLabel.transform.localRotation);
+			AddressInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-35, 138, 0), AddressInputLabel.transform.localRotation);
 
 			GameObject PortInputLabel = GameObject.Instantiate(AddressInputLabel, DCSettingsContainer.transform);
 			PortInputLabel.name = "PortInputLabel";
-			PortInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-64, 83, 0), AddressInputLabel.transform.localRotation);
+			PortInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-64, 91, 0), AddressInputLabel.transform.localRotation);
 
 			// Only create the UsernameInputLabel if the user enabled CustomUsernamePatch
 			if (LCDirectLan.GetConfig<bool>("Custom Username", "Enabled")) {
 				GameObject UsernameInputLabel = GameObject.Instantiate(AddressInputLabel, DCSettingsContainer.transform);
 				UsernameInputLabel.name = "UsernameInputLabel";
-				UsernameInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-64, 33, 0), AddressInputLabel.transform.localRotation);
+				UsernameInputLabel.transform.SetLocalPositionAndRotation(new Vector3(-64, 41, 0), AddressInputLabel.transform.localRotation);
 
 				TextMeshProUGUI TMPRouGUI_UsernameInputLabel = UsernameInputLabel.GetComponent<TextMeshProUGUI>();
 				TMPRouGUI_UsernameInputLabel.text = "My Username: ";
@@ -343,7 +343,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 
 			GameObject PoweredByLabel = GameObject.Instantiate(AddressInputLabel, DCSettingsContainer.transform);
 			PoweredByLabel.name = "LCDirectLANPoweredByLabel";
-			PoweredByLabel.transform.SetLocalPositionAndRotation(new Vector3(-0.5F, -110, 0), AddressInputLabel.transform.localRotation);
+			PoweredByLabel.transform.SetLocalPositionAndRotation(new Vector3(-0.5F, -105, 0), AddressInputLabel.transform.localRotation);
 
 			TextMeshProUGUI TMPRoUGUI_PortInputLabel = PortInputLabel.GetComponent<TextMeshProUGUI>();
 			TMPRoUGUI_PortInputLabel.text = "Server Port:";
@@ -352,14 +352,14 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			TMPRoUGUI_AddressInputLabel.text = "Server IP/Hostname:";
 
 			TextMeshProUGUI TMPRouGUI_PoweredByLabel = PoweredByLabel.GetComponent<TextMeshProUGUI>();
-			TMPRouGUI_PoweredByLabel.text = "Powered by TIRTAGT/LCDirectLAN";
+			TMPRouGUI_PoweredByLabel.text = $"Powered by TIRTAGT/{LCDirectLan.PLUGIN_NAME} v{LCDirectLan.PLUGIN_VERSION}";
 			TMPRouGUI_PoweredByLabel.alpha = 0.3F;
 			TMPRouGUI_PoweredByLabel.fontSizeMin = 13;
 			TMPRouGUI_PoweredByLabel.fontSize = 13;
 
 			// Duplicate the ServerNameField as the ServerPortField
 			GameObject ServerNameField_GameObject = DCSettingsContainer.transform.Find("ServerNameField").gameObject;
-			ServerNameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 110, 0), ServerNameField_GameObject.transform.localRotation);
+			ServerNameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 118, 0), ServerNameField_GameObject.transform.localRotation);
 			TMP_InputField ServerNameInputField = ServerNameField_GameObject.GetComponent<TMP_InputField>();
 			((TextMeshProUGUI)ServerNameInputField.placeholder).text = "";
 			ServerNameInputField.text = "";
@@ -367,7 +367,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 
 			GameObject ServerPortField_GameObject = GameObject.Instantiate(ServerNameField_GameObject, DCSettingsContainer.transform);
 			ServerPortField_GameObject.name = "ServerPortField";
-			ServerPortField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 62, 0), ServerPortField_GameObject.transform.localRotation);
+			ServerPortField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 70, 0), ServerPortField_GameObject.transform.localRotation);
 			TMP_InputField ServerPortInputField = ServerPortField_GameObject.GetComponent<TMP_InputField>();
 			((TextMeshProUGUI)ServerPortInputField.placeholder).text = LCDirectLan.GetConfig<ushort>("Join", "DefaultPort").ToString();
 			ServerPortInputField.text = "";
@@ -377,7 +377,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			if (LCDirectLan.GetConfig<bool>("Custom Username", "Enabled")) {
 				GameObject CustomUsernameField_GameObject = GameObject.Instantiate(ServerNameField_GameObject, DCSettingsContainer.transform);
 				CustomUsernameField_GameObject.name = "CustomUsernameField";
-				CustomUsernameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 10.5F, 0), CustomUsernameField_GameObject.transform.localRotation);
+				CustomUsernameField_GameObject.transform.SetLocalPositionAndRotation(new Vector3(0, 18.5F, 0), CustomUsernameField_GameObject.transform.localRotation);
 				TMP_InputField CustomUsernameInputField = CustomUsernameField_GameObject.GetComponent<TMP_InputField>();
 				((TextMeshProUGUI)CustomUsernameInputField.placeholder).text = "Lethal Player";
 				CustomUsernameInputField.text = LCDirectLan.GetConfig<string>("Custom Username", "JoinDefaultUsername");
@@ -388,7 +388,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Sucessfully Instantiate input fields");
 			// Remove all listener for Confirm and Back button, and change the text.
 			GameObject ConfirmButtonObj = DCSettingsContainer.transform.Find("Confirm").gameObject;
-			ConfirmButtonObj.transform.SetLocalPositionAndRotation(new Vector3(0, -50, 0), ConfirmButtonObj.transform.localRotation);
+			ConfirmButtonObj.transform.SetLocalPositionAndRotation(new Vector3(0, -40, 0), ConfirmButtonObj.transform.localRotation);
 
 			Button ConfirmButton = ConfirmButtonObj.GetComponent<Button>();
 
@@ -411,7 +411,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 			TMP_ConfirmButton.text = "[ Connect To Server ]";
 
 			GameObject BackButtonObj = DCSettingsContainer.transform.Find("Back").gameObject;
-			BackButtonObj.transform.SetLocalPositionAndRotation(new Vector3(0, -90, 0), BackButtonObj.transform.localRotation);
+			BackButtonObj.transform.SetLocalPositionAndRotation(new Vector3(0, -80, 0), BackButtonObj.transform.localRotation);
 
 			Button BackButton = BackButtonObj.GetComponent<Button>();
 			BackButton.onClick.RemoveAllListeners();
