@@ -55,7 +55,7 @@ namespace LCDirectLAN.Patches.LatencyHUD
 			}
 
 			// Check if we shouldn't track latency to ourself
-			if (LCDirectLan.GetConfig<bool>("Latency HUD", "HideWhileHosting") && NetworkManager.Singleton.IsServer) {
+			if (NetworkManager.Singleton.IsServer) {
 				LCDirectLan.Log(BepInEx.Logging.LogLevel.Debug, "Latency HUD is disabled while hosting !");
 				return;
 			}
