@@ -123,11 +123,19 @@ namespace LCDirectLAN
 			config.Bind<float>("Latency HUD", "Offset_Y", 0.0F, new ConfigDescription("Adjust the Y position of the Latency HUD\nHigher value moves the HUD to the top, lower value moves the HUD to the bottom"));
 			config.Bind<float>("Latency HUD", "TextSize", 11.0F, new ConfigDescription("Adjust font size of the Latency HUD (Minimum: 9)"));
 
+			config.Bind<bool>("Debugging", "BypassLateInjector", false, new ConfigDescription("Bypass the late injector and inject all patches immediately (useful in cases where the game intro is skipped)"));
 			config.Save();
 
-			// Inject script to detect if we are started in LAN or Online mode
-			Patches.PreInitSceneScriptPatch.SetLateInjector(InjectPatches);
-			HarmonyLib.PatchAll(typeof(Patches.PreInitSceneScriptPatch));
+			if (GetConfig<bool>("Debugging", "BypassLateInjector"))
+			{
+				LCDirectLan.IsOnLanMode = true;
+				InjectPatches();
+			}
+			else {
+				// Inject script to detect if we are started in LAN or Online mode
+				Patches.PreInitSceneScriptPatch.SetLateInjector(InjectPatches);
+				HarmonyLib.PatchAll(typeof(Patches.PreInitSceneScriptPatch));
+			}
 
 			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} is loaded");
 		}
@@ -136,9 +144,16 @@ namespace LCDirectLAN
 		/// A dedicated inject method to apply patches (allows early or late patching behavior)
 		/// </summary>
 		private void InjectPatches() {
+			bool VanillaSafe = true;
+
 			// Do not inject any further patches if we are not in LAN mode
 			if (!LCDirectLan.IsOnLanMode) {
-				Report_BMX_LobbyCompatibility(true);
+				if (Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility")) {
+					Report_BMX_LobbyCompatibility(VanillaSafe);
+				}
+				else {
+					Log(LogLevel.Warning, "BMX.LobbyCompatibility is not loaded, skipping compability report");
+				}
 				this.Logger.LogError($"{LCDirectLan.PLUGIN_NAME} should not be injected when game is started on Online (steam) mode");
 				return;
 			}
@@ -165,8 +180,13 @@ namespace LCDirectLAN
 				HarmonyLib.PatchAll(typeof(Patches.LatencyHUD.LatencyRPC));
 			}
 
-			// So far, LCDirectLAN are fully compatible with vanilla lobbies
-			Report_BMX_LobbyCompatibility(true);
+			if (Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility")) {
+				// So far, LCDirectLAN are fully compatible with vanilla lobbies
+				Report_BMX_LobbyCompatibility(VanillaSafe);
+			}
+			else {
+				Log(LogLevel.Warning, "BMX.LobbyCompatibility is not loaded, skipping compability report");
+			}
 
 			this.Logger.LogInfo($"{LCDirectLan.PLUGIN_NAME} patches are injected");
 		}
@@ -259,15 +279,11 @@ namespace LCDirectLAN
 		}
 
 		/// <summary>
-		/// Report compability to BMX.LobbyCompatibility plugin
+		/// Report compability to BMX.LobbyCompatibility plugin<br/><br/>
+		/// <b>(UNSAFE) This method should only be called when the plugin is loaded</b>
 		/// </summary>
 		/// <param name="VanillaSafe">Is LCDirectLAN with the current configuration are compatible with vanilla lobbies ?</param>
 		protected static void Report_BMX_LobbyCompatibility(bool VanillaSafe = false) {
-			if (!Chainloader.PluginInfos.ContainsKey("BMX.LobbyCompatibility")) {
-				LCDirectLan.Log(LogLevel.Warning, "BMX.LobbyCompatibility is not loaded, skipping compability report");
-				return;
-			}
-
 			PluginHelper.RegisterPlugin(
 				LCDirectLan.PLUGIN_GUID,
 				new Version(LCDirectLan.PLUGIN_VERSION),

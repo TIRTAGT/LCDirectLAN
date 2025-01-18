@@ -121,7 +121,7 @@ namespace LCDirectLAN.Patches.ConfigurableLAN
 		[HarmonyPatch("Start")]
 		[HarmonyPostfix]
 		[HarmonyPriority(Priority.VeryLow)]
-		public static void PrepareDirectLANDialog(MenuManager __instance, ref Boolean ___isInitScene)
+		public static void PrepareDirectLANDialog(MenuManager __instance, ref bool ___isInitScene)
 		{
 			if (___isInitScene) { return; }
 
